@@ -8,6 +8,7 @@ public:
 	Game() = default;
 	void Run();
 	void GatherInput();
+	bool InputIsInvalid(int input);
 	void VerifyWin();
 	void Render();
 	void Reset();

@@ -20,10 +20,34 @@ void Game::GatherInput()
 	{
 		std::cout << "Play as " << (currentPlayerIsO ? 'O' : 'X') << " (1 - 9)" << std::endl;
 		std::cin >> input;
-	} while (input < 1 || input > 9 || !grid.IsSlotEmpty(input - 1));
+		
+	} while (InputIsInvalid(input));
 
 	grid.Place(input - 1, currentPlayerIsO);
 	turns++;
+}
+
+bool Game::InputIsInvalid(int input)
+{
+	if (input < 1)
+	{
+		std::cout << "This input is too small" << std::endl;
+		return true;
+	}
+
+	if (input > 9)
+	{
+		std::cout << "This input is too big" << std::endl;
+		return true;
+	}
+
+	if (!grid.IsSlotEmpty(input - 1))
+	{
+		std::cout << "There is a symbol in this slot already" << std::endl;
+		return true;
+	}
+
+	return false;
 }
 
 void Game::VerifyWin()
