@@ -10,9 +10,10 @@ public:
 	void GatherInput();
 	void VerifyWin();
 	void Render();
+	void Reset();
 private:
 	Grid grid;
 	int turns = 0;
-	bool currentPlayer = false;
+	bool currentPlayerIsO = false;
 	bool playing = true;
 };

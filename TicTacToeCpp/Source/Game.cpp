@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 
 #include "../Include/Game.hpp"
 
@@ -9,8 +10,6 @@ void Game::Run()
 		GatherInput();
 		Render();
 		VerifyWin();
-		turns++;
-		currentPlayer = !currentPlayer;
 	}
 }
 
@@ -19,32 +18,39 @@ void Game::GatherInput()
 	int input;
 	do
 	{
-		std::cout << "Play as " << (currentPlayer > 0 ? 'O' : 'X') << " (1 - 9)" << std::endl;
+		std::cout << "Play as " << (currentPlayerIsO ? 'O' : 'X') << " (1 - 9)" << std::endl;
 		std::cin >> input;
 	} while (input < 1 || input > 9 || !grid.IsSlotEmpty(input - 1));
 
-	grid.Place(input - 1, currentPlayer);
+	grid.Place(input - 1, currentPlayerIsO);
+	turns++;
 }
 
 void Game::VerifyWin()
 {
 	if (grid.VerifyWin())
 	{
-		std::cout << (currentPlayer > 0 ? 'O' : 'X') << "Has won" << std::endl;
-		turns = -1;
-		grid.Clear();
+		std::cout << (currentPlayerIsO > 0 ? 'O' : 'X') << " has won" << std::endl;
+		Reset();
 	}
 
-	if (turns == 8)
+	if (turns == 9)
 	{
 		std::cout << "Its a Draw" << std::endl;
-		turns = -1;
-		grid.Clear();
+		Reset();
 	}
 		
+	currentPlayerIsO = !currentPlayerIsO;
 }
 
 void Game::Render()
 {
+	system("cls");
 	grid.Render();
+}
+
+void Game::Reset()
+{
+	turns = 0;
+	grid.Clear();
 }

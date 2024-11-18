@@ -16,10 +16,10 @@ Grid::Grid()
 #endif
 }
 
-void Grid::Place(int slot, int team)
+void Grid::Place(int slot, bool isO)
 {
 	int row = slot % 3;
-	grid[row][slot - row * 3] = team > 0 ? 'O' : 'X';
+	grid[row][slot - row * 3] = isO ? 'O' : 'X';
 }
 
 bool Grid::IsSlotEmpty(int slot) const
@@ -40,7 +40,7 @@ void Grid::Render() const
 		std::cout << "--+---+--" << std::endl;
 	}
 
-	std::cout << "\n\n" << std::endl;
+	std::cout << std::endl;
 }
 
 bool Grid::VerifyWin() const

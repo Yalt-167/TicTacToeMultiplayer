@@ -4,7 +4,7 @@ class Grid
 {
 public:
 	Grid();
-	void Place(int slot, int team);
+	void Place(int slot, bool isO);
 	bool IsSlotEmpty(int slot) const;
 	bool VerifyWin() const;
 	void Clear();
