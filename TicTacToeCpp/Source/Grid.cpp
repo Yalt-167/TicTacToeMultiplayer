@@ -28,7 +28,6 @@ bool Grid::IsSlotEmpty(int slot) const
 	return grid[row][slot - row * 3] == ' ';
 }
 
-
 void Grid::Render() const
 {
 	for (int row = 0; row < 3; row++)
