@@ -1,7 +1,25 @@
 #include <iostream>
 #include <cstdlib>
+#include<functional>
+
 
 #include "../Include/Game.hpp"
+#include "../Include/Player.hpp"
+#include "../Include/HumanPlayer.hpp"
+#include "../Include/CPUPlayer.hpp"
+
+Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman)
+{
+	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
+	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
+
+	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
+}
+
+Game::~Game()
+{
+
+}
 
 void Game::Run()
 {
@@ -15,15 +33,7 @@ void Game::Run()
 
 void Game::GatherInput()
 {
-	int input;
-	do
-	{
-		std::cout << "Play as " << (currentPlayerIsO ? 'O' : 'X') << " (1 - 9)" << std::endl;
-		std::cin >> input;
-		
-	} while (InputIsInvalid(input));
-
-	grid.Place(input - 1, currentPlayerIsO);
+	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate), currentPlayerIsO);
 	turns++;
 }
 
@@ -67,7 +77,7 @@ void Game::VerifyWin()
 	currentPlayerIsO = !currentPlayerIsO;
 }
 
-void Game::Render()
+void Game::Render() const
 {
 	system("cls");
 	grid.Render();
