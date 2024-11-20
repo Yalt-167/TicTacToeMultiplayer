@@ -10,15 +10,15 @@
 
 Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman)
 {
-	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
-	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
+	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
+	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
 
 	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
 }
 
 Game::~Game()
 {
-
+	delete[] players;
 }
 
 void Game::Run()
