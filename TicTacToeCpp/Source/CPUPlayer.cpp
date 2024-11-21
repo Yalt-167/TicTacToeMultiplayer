@@ -1,18 +1,31 @@
 #include <iostream>
 
 #include "../Include/CPUPlayer.hpp"
+#include "../Include/Grid.hpp"
 
-CPUPlayer::CPUPlayer(char symbol) : Player(symbol) { }
-
-int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate)
+CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
 {
-	int input;
-	do
+	ai = MyAI(symbol);
+}
+
+int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid& grid)
+{
+	if (!ai.HasTree())
 	{
-		std::cout << "Play as " << Symbol << "(CPU) (1 - 9)" << std::endl;
-		std::cin >> input;
+		ai.SetupTree(grid);
+	}
 
-	} while (inputPredicate(input));
+	ai.RemoveOutdatedGrids(grid);
 
-	return input - 1;
+	// int input;
+	// do
+	//{
+	//	std::cout << "Play as " << Symbol << "(CPU) (1 - 9)" << std::endl;
+	//	std::cin >> input;
+
+	//} while (inputPredicate(input));*
+
+	//return input - 1;
+
+	return ai.Think(grid);
 }
