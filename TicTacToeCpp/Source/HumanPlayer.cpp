@@ -6,7 +6,7 @@
 HumanPlayer::HumanPlayer(char symbol) : Player(symbol) { }
 
 
-int HumanPlayer::GatherInput(std::function<bool(int)> inputPredicate)
+int HumanPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid&)
 {
 	int input;
 	do
