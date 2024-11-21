@@ -18,14 +18,12 @@ Grid::Grid()
 
 void Grid::Place(int slot, bool isO)
 {
-	int row = slot % 3;
-	grid[row][slot - row * 3] = isO ? 'O' : 'X';
+	grid[slot / 3][slot % 3] = isO ? 'O' : 'X';
 }
 
 bool Grid::IsSlotEmpty(int slot) const
 {
-	int row = slot % 3;
-	return grid[row][slot - row * 3] == ' ';
+	return grid[slot / 3][slot % 3] == ' ';
 }
 
 void Grid::Render() const
@@ -40,6 +38,11 @@ void Grid::Render() const
 	}
 
 	std::cout << std::endl;
+}
+
+std::vector<std::vector<char>> Grid::GetRaw() const
+{
+	return grid;
 }
 
 bool Grid::VerifyWin() const
@@ -62,12 +65,68 @@ bool Grid::VerifyWin() const
 		return true;
 	}
 
-	if (' ' != grid[0][0] && grid[0][0] == grid[1][1] && grid[1][1] == grid[2][0])
+	if (' ' != grid[0][2] && grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0])
 	{
 		return true;
 	}
 
 	return false;
+}
+
+// STATIC but this dogshit language doesn t let me mark it properly from here
+int Grid::EvaluateGrid(const std::vector<std::vector<char>>& grid_, char symbolThatShouldWin)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (' ' != grid_[i][0] && grid_[i][0] == grid_[i][1] && grid_[i][1] == grid_[i][2])
+		{
+			return grid_[i][0] == symbolThatShouldWin ? 10 : -10;
+		}
+
+		if (' ' != grid_[0][i] && grid_[0][i] == grid_[1][i] && grid_[1][i] == grid_[2][i])
+		{
+			return grid_[0][i] == symbolThatShouldWin ? 10 : -10;
+		}
+	}
+
+	if (' ' != grid_[0][0] && grid_[0][0] == grid_[1][1] && grid_[1][1] == grid_[2][2])
+	{
+		return grid_[0][0] == symbolThatShouldWin ? 10 : -10;
+	}
+
+	if (' ' != grid_[0][2] && grid_[0][2] == grid_[1][1] && grid_[1][1] == grid_[2][0])
+	{
+		return grid_[0][2] == symbolThatShouldWin ? 10 : -10;
+	}
+
+	return 0;
+}
+
+// STATIC
+int Grid::GetDifference(const std::vector<std::vector<char>>& firstGrid, const std::vector<std::vector<char>>& secondGrid)
+{
+	for (int i = 0; i < 9; i++)
+	{
+		if (firstGrid[i / 3][i % 3] != secondGrid[i / 3][i % 3])
+		{
+			return i;
+		}
+	}
+
+	throw new std::runtime_error("Same grid somehow");
+}
+// STATIC
+int Grid::GetDifference(const Grid& firstGrid, const Grid& secondGrid)
+{
+	for (int i = 0; i < 9; i++)
+	{
+		if (firstGrid.grid[i / 3][i % 3] != secondGrid.grid[i / 3][i % 3])
+		{
+			return i;
+		}
+	}
+
+	throw new std::runtime_error("Same grid somehow");
 }
 
 void Grid::Clear()
