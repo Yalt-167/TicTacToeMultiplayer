@@ -33,7 +33,7 @@ void Game::Run()
 
 void Game::GatherInput()
 {
-	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate), currentPlayerIsO);
+	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate, grid), currentPlayerIsO);
 	turns++;
 }
 
@@ -64,7 +64,7 @@ void Game::VerifyWin()
 {
 	if (grid.VerifyWin())
 	{
-		std::cout << (currentPlayerIsO > 0 ? 'O' : 'X') << " has won" << std::endl;
+		std::cout << (currentPlayerIsO ? 'O' : 'X') << " has won" << std::endl;
 		Reset();
 	}
 
@@ -79,7 +79,7 @@ void Game::VerifyWin()
 
 void Game::Render() const
 {
-	system("cls");
+	//system("cls");
 	grid.Render();
 }
 
