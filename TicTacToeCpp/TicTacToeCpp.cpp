@@ -4,13 +4,13 @@
 #include "Include/Game.hpp"
 #include "Include/Tree.hpp"
 
-#define RUN_GAME
+//#define RUN_TESTS
+constexpr auto HUMAN_PLAYER = true;
+constexpr auto DO_CLEAR_CONSOLE = true;
 
 int main(int, char**)
 {
-#ifdef RUN_GAME
-	Game(true, false).Run();
-#else
+#ifdef RUN_TESTS
 	Node<int> node = Node<int>(1);
 	node.AddChild(new Node<int>(3));
 	node.AddChild(new Node<int>(2));
@@ -19,5 +19,7 @@ int main(int, char**)
 	node.Children[1]->AddChild(new Node<int>(7));
 	node.Children[1]->AddChild(new Node<int>(6));
 	node.DepthFirst();
+#else
+	Game(HUMAN_PLAYER, !HUMAN_PLAYER, DO_CLEAR_CONSOLE).Run();
 #endif
 }

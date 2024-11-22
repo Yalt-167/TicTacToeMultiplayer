@@ -13,6 +13,19 @@ public:
 	static int GetDifference(const Grid& firstGrid, const Grid& secondGrid);
 	void Clear();
 	void Render() const;
+	static void RenderStatic(const std::vector<std::vector<char>>& grid_)
+	{
+		for (int row = 0; row < 3; row++)
+		{
+			std::cout << grid_[row][0] << " | " << grid_[row][1] << " | " << grid_[row][2] << std::endl;
+
+			if (row == 2) { break; }
+
+			std::cout << "--+---+--" << std::endl;
+		}
+
+		std::cout << std::endl;
+	}
 	std::vector<std::vector<char>> GetRaw() const;
 private:
 	std::vector<std::vector<char>> grid = {
