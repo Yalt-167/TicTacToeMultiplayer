@@ -10,22 +10,21 @@ CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
 
 int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid& grid)
 {
+	std::cout << "Thinking" << std::endl;
+
 	if (!ai.HasTree())
 	{
 		ai.SetupTree(grid);
 	}
-
-	ai.RemoveOutdatedGrids(grid);
-
-	// int input;
-	// do
-	//{
-	//	std::cout << "Play as " << Symbol << "(CPU) (1 - 9)" << std::endl;
-	//	std::cin >> input;
-
-	//} while (inputPredicate(input));*
-
-	//return input - 1;
+	else
+	{
+		ai.RemoveOutdatedGrids(grid);
+	}
 
 	return ai.Think(grid);
+}
+
+void CPUPlayer::Reset()
+{
+	ai.Reset();
 }
