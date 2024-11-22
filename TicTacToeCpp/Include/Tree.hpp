@@ -26,19 +26,41 @@ public:
 		child->RemoveChildren();
 		Children.erase(std::remove(Children.begin(), Children.end(), child), Children.end());
 		child->Parent = nullptr;
+		delete child;
 	}
 	void RemoveChildren()
 	{
 		for (Node* child : Children)
 		{
 			child->RemoveChildren();
+			delete child;
 		}
 
 		Children.clear();
 
 	}
-	void RemoveParent()
+	void RemoveChildrenExcept(Node* child)
 	{
+		for (int i = Children.size() - 1; i > -1; i--)
+		{
+			if (Children[i] != child)
+			{
+				Children[i]->RemoveChildren();
+				delete Children[i];
+			}
+		}
+
+		Children.clear();
+
+	}
+	void RemoveParent(bool doKillOtherChildren)
+	{
+		if (doKillOtherChildren)
+		{
+			RemoveChildrenExcept(this);
+		}
+		
+		delete Parent;
 		Parent = nullptr;
 	}
 	bool IsRoot()
@@ -49,7 +71,7 @@ public:
 	{
 		return Children.size() == 0;
 	}
-	void DepthFirst()
+	void DepthFirst() // sole purpose of testing the tree
 	{
 		std::cout << this->Value << std::endl;
 
@@ -58,6 +80,7 @@ public:
 			node->DepthFirst();
 		}
 	}
+	
 	int Evaluate(std::function<int(const std::vector<std::vector<char>>& grid, char symbolThatShouldWin_)> evaluationMethod, char symbolThatShouldWin)
 	{
 		if (IsLeaf())
