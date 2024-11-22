@@ -11,10 +11,12 @@ class MyAI
 public:
 	MyAI() = default;
 	MyAI(char symbol_);
+	~MyAI();
 	bool HasTree() const;
 	void SetupTree(Grid& currentGrid);
 	void RemoveOutdatedGrids(Grid& currentGrid);
 	int Think(Grid& currentGrid);
+	void Reset();
 	Node<std::vector<std::vector<char>>>* currentRoot = nullptr;
 private:
 	void FillTree(Node<std::vector<std::vector<char>>>* currentNode, bool const isSelfTurn);
@@ -32,5 +34,5 @@ private:
 		std::cout << std::endl;
 	}
 	Node<std::vector<std::vector<char>>>* Evaluate();
-	char symbol;
+	char symbol = '@'; // if somehow this shows up im fucked
 };

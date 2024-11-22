@@ -9,6 +9,11 @@ MyAI::MyAI(char symbol_)
 	symbol = symbol_;
 }
 
+MyAI::~MyAI()
+{
+	//Reset();
+}
+
 bool MyAI::HasTree() const
 {
 	return currentRoot != nullptr;
@@ -39,9 +44,12 @@ Node<std::vector<std::vector<char>>>* MyAI::Evaluate()
 {
 	int bestScore = INT_MIN;
 	Node<std::vector<std::vector<char>>>* bestNode = nullptr;
+
 	for (Node<std::vector<std::vector<char>>>* node : currentRoot->Children)
 	{
 		int currentScore = node->Evaluate(Grid::EvaluateGrid, symbol);
+		
+		std::cout << "CurrentScore: " << currentScore << std::endl;
 		if (currentScore > bestScore)
 		{
 			bestNode = node;
@@ -55,17 +63,17 @@ Node<std::vector<std::vector<char>>>* MyAI::Evaluate()
 void MyAI::RemoveOutdatedGrids(Grid& currentGrid)
 {
 	std::vector<std::vector<char>> currentRawGrid = currentGrid.GetRaw();
-
+	
 	Node<std::vector<std::vector<char>>>* newRoot = nullptr;
-	for (Node<std::vector<std::vector<char>>>* node : currentRoot->Children)
+	for (int i = (int)currentRoot->Children.size() - 1; i > -1; i--) // do it backward to avoid error with removing elements while iterating over it
 	{
-		if (node->Value == currentRawGrid)
+		if (currentRoot->Children[i]->Value == currentRawGrid)
 		{
-			newRoot = node;
+			newRoot = currentRoot->Children[i];
 		}
 		else
 		{
-			currentRoot->RemoveChild(node);
+			currentRoot->RemoveChild(currentRoot->Children[i]);
 		}
 	}
 
@@ -74,8 +82,18 @@ void MyAI::RemoveOutdatedGrids(Grid& currentGrid)
 
 int MyAI::Think(Grid& currentGrid)
 {
+	// memory leak here
+	// // nodePtr is simply overriden so all the other branches are leaked
 	currentRoot = Evaluate();
+
 	return Grid::GetDifference(currentGrid.GetRaw(), currentRoot->Value);
+}
+
+void MyAI::Reset()
+{
+	currentRoot->RemoveChildren();
+	delete currentRoot;
+	currentRoot = nullptr;
 }
 
 
