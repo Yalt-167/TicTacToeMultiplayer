@@ -8,12 +8,14 @@
 #include "../Include/HumanPlayer.hpp"
 #include "../Include/CPUPlayer.hpp"
 
-Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman)
+Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 {
 	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
 	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
 
 	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
+
+	doClearConsole = doClearConsole_;
 }
 
 Game::~Game()
@@ -79,12 +81,22 @@ void Game::VerifyWin()
 
 void Game::Render() const
 {
-	//system("cls");
+	if (doClearConsole)
+	{
+		system("cls");
+	}
+
 	grid.Render();
 }
 
 void Game::Reset()
 {
 	turns = 0;
+
 	grid.Clear();
+
+	for (int i = 0; i < 2; i++)
+	{
+		players[i]->Reset();
+	}
 }
