@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 #include<functional>
+#include <thread>
+#include <chrono>
 
 
 #include "../Include/Game.hpp"
@@ -13,6 +15,7 @@ Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
 	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
 
+	twoAIs = !(playerOneIsHuman || playerTwoIsHuman);
 	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
 
 	doClearConsole = doClearConsole_;
@@ -77,6 +80,11 @@ void Game::VerifyWin()
 	}
 		
 	currentPlayerIsO = !currentPlayerIsO;
+
+	if (twoAIs)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // so we can actually see what happens
+	}
 }
 
 void Game::Render() const
