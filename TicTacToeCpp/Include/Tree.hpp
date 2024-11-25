@@ -41,7 +41,7 @@ public:
 	}
 	void RemoveChildrenExcept(Node* child)
 	{
-		for (int i = Children.size() - 1; i > -1; i--)
+		for (int i = (int)Children.size() - 1; i > -1; i--)
 		{
 			if (Children[i] != child)
 			{
@@ -57,7 +57,7 @@ public:
 	{
 		if (doKillOtherChildren)
 		{
-			RemoveChildrenExcept(this);
+			Parent->RemoveChildrenExcept(this);
 		}
 		
 		delete Parent;
