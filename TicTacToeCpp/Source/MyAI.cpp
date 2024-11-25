@@ -49,7 +49,6 @@ Node<std::vector<std::vector<char>>>* MyAI::Evaluate()
 	{
 		int currentScore = node->Evaluate(Grid::EvaluateGrid, symbol);
 		
-		std::cout << "CurrentScore: " << currentScore << std::endl;
 		if (currentScore > bestScore)
 		{
 			bestNode = node;
@@ -85,6 +84,7 @@ int MyAI::Think(Grid& currentGrid)
 	// memory leak here
 	// // nodePtr is simply overriden so all the other branches are leaked
 	currentRoot = Evaluate();
+	currentRoot->RemoveParent(true);
 
 	return Grid::GetDifference(currentGrid.GetRaw(), currentRoot->Value);
 }
