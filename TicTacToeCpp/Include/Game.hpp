@@ -21,6 +21,7 @@ private:
 	bool currentPlayerIsO = false;
 	bool doClearConsole = true;
 	bool playing = true;
+	bool twoAIs = false;
 	Player** players = new Player*[2];
 	std::function<bool(int)> inputValidationPredicate;
 };
