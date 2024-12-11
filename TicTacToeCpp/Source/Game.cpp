@@ -19,15 +19,21 @@ Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
 
 	doClearConsole = doClearConsole_;
+
+	window = new Window(600, 600, "Tic");
 }
 
 Game::~Game()
 {
 	delete[] players;
+
+	delete window;
 }
 
 void Game::Run()
 {
+	Render();
+
 	while (playing)
 	{
 		GatherInput();
@@ -38,7 +44,7 @@ void Game::Run()
 
 void Game::GatherInput()
 {
-	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate, grid), currentPlayerIsO);
+	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate, grid, window->RenderWindow), currentPlayerIsO);
 	turns++;
 }
 
@@ -87,14 +93,18 @@ void Game::VerifyWin()
 	}
 }
 
-void Game::Render() const
+void Game::Render()
 {
 	if (doClearConsole)
 	{
 		system("cls");
 	}
 
+	window->RenderWindow->clear(sf::Color::Black);
 	grid.RenderToConsole();
+	grid.Render(window->RenderWindow);
+	window->Rename(currentPlayerIsO ? "Tic" : "Tac");
+	window->RenderWindow->display();
 }
 
 void Game::Reset()
@@ -107,4 +117,6 @@ void Game::Reset()
 	{
 		players[i]->Reset();
 	}
+
+	Render();
 }
