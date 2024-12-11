@@ -8,7 +8,7 @@ CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
 	ai = MyAI(symbol);
 }
 
-int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid& grid)
+int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid& grid, sf::RenderWindow*)
 {
 	std::cout << "Thinking" << std::endl;
 

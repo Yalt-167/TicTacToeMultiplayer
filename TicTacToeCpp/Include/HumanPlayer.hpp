@@ -9,5 +9,5 @@ class HumanPlayer : public Player
 public:
 	HumanPlayer() = default;
 	HumanPlayer(char symbol);
-	int GatherInput(std::function<bool(int)> inputPredicate, Grid&) override;
+	int GatherInput(std::function<bool(int)> inputPredicate, Grid&, sf::RenderWindow* renderWindow) override;
 };
