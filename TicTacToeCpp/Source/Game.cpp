@@ -5,10 +5,10 @@
 #include <chrono>
 
 
-#include "../Include/Game.hpp"
-#include "../Include/Player.hpp"
-#include "../Include/HumanPlayer.hpp"
-#include "../Include/CPUPlayer.hpp"
+#include "Game.hpp"
+#include "Player.hpp"
+#include "HumanPlayer.hpp"
+#include "CPUPlayer.hpp"
 
 Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 {
@@ -94,7 +94,7 @@ void Game::Render() const
 		system("cls");
 	}
 
-	grid.Render();
+	grid.RenderToConsole();
 }
 
 void Game::Reset()

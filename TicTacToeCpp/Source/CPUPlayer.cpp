@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "../Include/CPUPlayer.hpp"
-#include "../Include/Grid.hpp"
+#include "CPUPlayer.hpp"
+#include "Grid.hpp"
 
 CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
 {

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <functional>
 
-#include "../Include/HumanPlayer.hpp"
+#include "HumanPlayer.hpp"
 
 HumanPlayer::HumanPlayer(char symbol) : Player(symbol) { }
 

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <limits>
 
-#include "../Include/MyAI.hpp"
-#include "../Include/Tree.hpp"
+#include "MyAI.hpp"
+#include "Tree.hpp"
 
 MyAI::MyAI(char symbol_)
 {
@@ -81,8 +81,6 @@ void MyAI::RemoveOutdatedGrids(Grid& currentGrid)
 
 int MyAI::Think(Grid& currentGrid)
 {
-	// memory leak here
-	// // nodePtr is simply overriden so all the other branches are leaked
 	currentRoot = Evaluate();
 	currentRoot->RemoveParent(true);
 
