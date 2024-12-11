@@ -2,7 +2,8 @@
 
 #include <functional>
 
-class Grid;
+#include "Grid.hpp"
+
 
 class Player
 {

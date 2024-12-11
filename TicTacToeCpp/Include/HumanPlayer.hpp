@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+
 #include "Player.hpp"
 
 class HumanPlayer : public Player

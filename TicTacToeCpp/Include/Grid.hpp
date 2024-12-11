@@ -1,6 +1,12 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
+
+#include "SFML/Graphics.hpp"
+#include "SFML/window.hpp"
+#include "SFML/system.hpp"
+
 class Grid
 {
 public:
@@ -12,7 +18,8 @@ public:
 	static int GetDifference(const std::vector<std::vector<char>>& firstGrid, const std::vector<std::vector<char>>& secondGrid);
 	static int GetDifference(const Grid& firstGrid, const Grid& secondGrid);
 	void Clear();
-	void Render() const;
+	void RenderToConsole() const;
+	void Render(sf::RenderWindow* renderWindow) const;
 	static void RenderStatic(const std::vector<std::vector<char>>& grid_)
 	{
 		for (int row = 0; row < 3; row++)
@@ -33,4 +40,11 @@ private:
 		{' ', ' ', ' ' },
 		{' ', ' ', ' ' },
 	};
+
+	sf::Sprite gridSprite;
+	sf::Texture gridTexture;
+	sf::Sprite crossSprite;
+	sf::Texture crossTexture;
+	sf::Sprite circleSprite;
+	sf::Texture circleTexture;
 };
