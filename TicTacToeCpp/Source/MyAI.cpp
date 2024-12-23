@@ -4,6 +4,10 @@
 #include "MyAI.hpp"
 #include "Tree.hpp"
 
+#define WITH_TREE
+// not meant to be in the final assignment but I had fun so it s staying
+
+
 MyAI::MyAI(char symbol_)
 {
 	symbol = symbol_;
@@ -11,7 +15,18 @@ MyAI::MyAI(char symbol_)
 
 MyAI::~MyAI()
 {
-	//Reset();
+	Reset();
+}
+
+int MyAI::DoMagic(Grid& currentGrid)
+{
+#ifdef WITH_TREE
+	
+
+	return ThinkTree(currentGrid);
+#else
+	return ThinkNoTree(currentGrid);
+#endif // WITH_TREE
 }
 
 bool MyAI::HasTree() const
@@ -79,8 +94,17 @@ void MyAI::RemoveOutdatedGrids(Grid& currentGrid)
 	currentRoot = newRoot;
 }
 
-int MyAI::Think(Grid& currentGrid)
+int MyAI::ThinkTree(Grid& currentGrid)
 {
+	if (!HasTree())
+	{
+		SetupTree(currentGrid);
+	}
+	else
+	{
+		RemoveOutdatedGrids(currentGrid);
+	}
+
 	currentRoot = Evaluate();
 	currentRoot->RemoveParent(true);
 
@@ -89,10 +113,73 @@ int MyAI::Think(Grid& currentGrid)
 
 void MyAI::Reset()
 {
+	if (currentRoot == nullptr) { return; } // used the NoTree version so nothing to cleanup
+
 	currentRoot->RemoveChildren();
+	
 	delete currentRoot;
 	currentRoot = nullptr;
 }
 
 
+int MyAI::ThinkNoTree(Grid& grid) const
+{
+	int alpha = -1000;
+	int bestInput;
+	for (int i = 0; i < 9; i++)
+	{
+		if (!grid.IsSlotEmpty(i)) { continue; }
+
+		int value = Evaluate(true, grid.GetRaw(), i, alpha, 1000);
+
+		if (value == 1) { return i; } // means that the AI wins
+
+		if (alpha < value) // otherwise check wether this input was better than the previous
+		{
+			bestInput = i;
+			alpha = value;
+		}
+	}
+
+	return bestInput;
+}
+
+int MyAI::Evaluate(bool isPlaying, std::vector<std::vector<char>> rawGrid, int currentInput, int alpha, int beta) const
+{
+	rawGrid[currentInput / 3][currentInput % 3] = isPlaying ? symbol : symbol == 'X' ? 'O' : 'X';
+
+	int winning = Grid::EvaluateGrid(rawGrid, symbol);
+	if (winning != 0) // if one or the other player won thanks to <currentInput> 
+	{
+		return winning;
+	}
+
+	if (Grid::CheckWetherGridFull(rawGrid)) { return 0; }
+
+	int value = isPlaying ? -1000 : 1000;
+
+	for (int i = 0; i < 9; i++)
+	{
+		if (!Grid::IsSlotEmpty(rawGrid, i)) { continue; }
+
+		int value2 = Evaluate(!isPlaying, rawGrid, i, -beta, -alpha);
+
+		if (isPlaying)
+		{
+			value = value > value2 ? value : value2;
+			alpha = alpha > value ? alpha : value;
+
+			if (alpha >= beta) { break; }
+		}
+		else
+		{
+			value = value < value2 ? value : value2;
+			beta = beta < value ? beta : value;
+
+			if (alpha >= beta) { break; }
+		}
+	}
+
+	return value;
+}
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <functional>
 
 #include "Grid.hpp"
 #include "Tree.hpp"
@@ -12,27 +11,21 @@ public:
 	MyAI() = default;
 	MyAI(char symbol_);
 	~MyAI();
+	int DoMagic(Grid& currentGrid);
+	void Reset();
+private:
+	char symbol = '@'; // if somehow this show s up im fucked
+
+	// Tree Version
+	Node<std::vector<std::vector<char>>>* currentRoot = nullptr;
 	bool HasTree() const;
 	void SetupTree(Grid& currentGrid);
 	void RemoveOutdatedGrids(Grid& currentGrid);
-	int Think(Grid& currentGrid);
-	void Reset();
-	Node<std::vector<std::vector<char>>>* currentRoot = nullptr;
-private:
+	int ThinkTree(Grid& currentGrid);
 	void FillTree(Node<std::vector<std::vector<char>>>* currentNode, bool const isSelfTurn);
-	void RenderGridLikeARetard(Node<std::vector<std::vector<char>>>* node)
-	{
-		for (int row = 0; row < 3; row++)
-		{
-			std::cout << node->Value[row][0] << " | " << node->Value[row][1] << " | " << node->Value[row][2] << std::endl;
-
-			if (row == 2) { break; }
-
-			std::cout << "--+---+--" << std::endl;
-		}
-
-		std::cout << std::endl;
-	}
 	Node<std::vector<std::vector<char>>>* Evaluate();
-	char symbol = '@'; // if somehow this shows up im fucked
+
+	// ! Tree Version
+	int ThinkNoTree(Grid& currentGrid) const; 
+	int Evaluate(bool playing, std::vector<std::vector<char>> rawGrid, int currentInput, int alpha, int beta) const;
 };
