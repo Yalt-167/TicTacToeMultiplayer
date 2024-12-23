@@ -3,28 +3,26 @@
 #include "CPUPlayer.hpp"
 #include "Grid.hpp"
 
-CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
+
+CPUPlayer::~CPUPlayer()
 {
-	ai = MyAI(symbol);
+	ai->~MyAI();
+	delete ai; // humanity is saved
 }
 
-int CPUPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid& grid, sf::RenderWindow*)
+CPUPlayer::CPUPlayer(char symbol) : Player(symbol)
+{
+	ai = new MyAI(symbol);
+}
+
+int CPUPlayer::GatherInput(Grid& grid, sf::RenderWindow*)
 {
 	std::cout << "Thinking" << std::endl;
 
-	if (!ai.HasTree())
-	{
-		ai.SetupTree(grid);
-	}
-	else
-	{
-		ai.RemoveOutdatedGrids(grid);
-	}
-
-	return ai.Think(grid);
+	return ai->DoMagic(grid);
 }
 
 void CPUPlayer::Reset()
 {
-	ai.Reset();
+	ai->Reset();
 }
