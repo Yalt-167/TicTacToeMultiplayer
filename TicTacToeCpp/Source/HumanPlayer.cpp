@@ -12,25 +12,16 @@
 HumanPlayer::HumanPlayer(char symbol) : Player(symbol) { }
 
 
-int HumanPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid&, sf::RenderWindow* renderWindow)
+int HumanPlayer::GatherInput(Grid& grid, sf::RenderWindow* renderWindow)
 {
-	int input = -1;
-	/*
-	do
-	{
-		std::cout << "Play as " << Symbol << " (1 - 9)" << std::endl;
-		std::cin >> input;
-
-	} while (inputPredicate(input));
-
-	return input - 1;
-	*/
-
+	int validatedInput = -1;
+	int rawInput = -1;
+	
 	sf::Event event;
 	sf::Vector2i mousePos;
 	int row;
 	int column;
-	while (input < 0)
+	while (validatedInput < 0)
 	{
 		while (renderWindow->pollEvent(event))
 		{
@@ -47,10 +38,16 @@ int HumanPlayer::GatherInput(std::function<bool(int)> inputPredicate, Grid&, sf:
 
 					column = mousePos.x / SpritesData::CellSize;
 					row = mousePos.y / SpritesData::CellSize;
-					input = 3 * row + column;
+
+					rawInput = 3 * row + column;
+
+					if (grid.IsSlotEmpty(rawInput))
+					{
+						validatedInput = rawInput;
+					}
 			}
 		}
 	}
 
-	return input;
+	return validatedInput;
 }
