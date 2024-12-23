@@ -140,6 +140,7 @@
     <ClCompile Include="Source\HumanPlayer.cpp" />
     <ClCompile Include="Source\MyAI.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\SpritesData.cpp" />
     <ClCompile Include="Source\Tree.cpp" />
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
@@ -150,6 +151,7 @@
     <ClInclude Include="Include\HumanPlayer.hpp" />
     <ClInclude Include="Include\MyAI.hpp" />
     <ClInclude Include="Include\Player.hpp" />
+    <ClInclude Include="Include\SpritesData.hpp" />
     <ClInclude Include="Include\Tree.hpp" />
     <ClInclude Include="Include\Window.hpp" />
   </ItemGroup>
