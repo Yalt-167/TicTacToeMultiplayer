@@ -13,13 +13,16 @@ public:
 	Grid();
 	void Place(int slot, bool isO);
 	bool IsSlotEmpty(int slot) const;
+	static bool IsSlotEmpty(const std::vector<std::vector<char>>& grid, int slot);
 	bool VerifyWin() const;
+	static bool CheckRawGrid(const std::vector<std::vector<char>>& grid);
+	static bool CheckWetherGridFull(const std::vector<std::vector<char>>& grid);
 	static int EvaluateGrid(const std::vector<std::vector<char>>& grid, char symbolThatShouldWin);
 	static int GetDifference(const std::vector<std::vector<char>>& firstGrid, const std::vector<std::vector<char>>& secondGrid);
 	static int GetDifference(const Grid& firstGrid, const Grid& secondGrid);
 	void Clear();
 	void RenderToConsole() const;
-	void Render(sf::RenderWindow* renderWindow) const;
+	void Render(sf::RenderWindow* renderWindow);
 	static void RenderStatic(const std::vector<std::vector<char>>& grid_)
 	{
 		for (int row = 0; row < 3; row++)
