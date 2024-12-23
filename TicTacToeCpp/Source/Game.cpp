@@ -16,7 +16,7 @@ Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
 
 	twoAIs = !(playerOneIsHuman || playerTwoIsHuman);
-	inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
+	//inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
 
 	doClearConsole = doClearConsole_;
 
@@ -36,15 +36,15 @@ void Game::Run()
 
 	while (playing)
 	{
-		GatherInput();
+		Play();
 		Render();
 		VerifyWin();
 	}
 }
 
-void Game::GatherInput()
+void Game::Play()
 {
-	grid.Place(players[(int)currentPlayerIsO]->GatherInput(inputValidationPredicate, grid, window->RenderWindow), currentPlayerIsO);
+	grid.Place(players[(int)currentPlayerIsO]->GatherInput(grid, window->RenderWindow), currentPlayerIsO);
 	turns++;
 }
 
@@ -87,10 +87,9 @@ void Game::VerifyWin()
 		
 	currentPlayerIsO = !currentPlayerIsO;
 
-	if (twoAIs)
-	{
-		std::this_thread::sleep_for(std::chrono::seconds(1)); // so we can actually see what happens
-	}
+	if (!twoAIs) { return; }
+
+	std::this_thread::sleep_for(std::chrono::seconds(1)); // so we can actually see what happens
 }
 
 void Game::Render()
@@ -119,4 +118,6 @@ void Game::Reset()
 	}
 
 	Render();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }

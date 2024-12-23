@@ -11,12 +11,13 @@ public:
 	Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_);
 	~Game();
 	void Run();
-	void GatherInput();
+	void Play();
 	bool InputIsInvalid(int input);
 	void VerifyWin();
-	void Render() const;
+	void Render();
 	void Reset();
 private:
+	Window* window = nullptr;
 	Grid grid;
 	int turns = 0;
 	bool currentPlayerIsO = false;
@@ -24,5 +25,5 @@ private:
 	bool playing = true;
 	bool twoAIs = false;
 	Player** players = new Player*[2];
-	std::function<bool(int)> inputValidationPredicate;
+	//std::function<bool(int)> inputValidationPredicate;
 };
