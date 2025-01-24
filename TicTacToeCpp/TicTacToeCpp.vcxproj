@@ -178,15 +178,9 @@
     <ClInclude Include="Include\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Images\Circle.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Client|x64'">false</ExcludedFromBuild>
-    </Image>
-    <Image Include="Assets\Images\Cross.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Client|x64'">false</ExcludedFromBuild>
-    </Image>
-    <Image Include="Assets\Images\Grid.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Client|x64'">false</ExcludedFromBuild>
-    </Image>
+  	<Content Include="Assets\**">
+  		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  	</Content>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
