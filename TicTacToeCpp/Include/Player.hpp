@@ -2,10 +2,6 @@
 
 #include "Grid.hpp"
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-
 class Player
 {
 public:

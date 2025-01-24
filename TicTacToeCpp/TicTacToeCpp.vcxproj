@@ -152,6 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Include;$(SolutionDir)SFML/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)Include/Common.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -171,9 +172,13 @@
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\ClientSocket.hpp" />
+    <ClInclude Include="Include\Common.hpp" />
     <ClInclude Include="Include\Game.hpp" />
     <ClInclude Include="Include\Grid.hpp" />
     <ClInclude Include="Include\Player.hpp" />
+    <ClInclude Include="Include\ServerSocket.hpp" />
+    <ClInclude Include="Include\Socket.hpp" />
     <ClInclude Include="Include\SpritesData.hpp" />
     <ClInclude Include="Include\Window.hpp" />
   </ItemGroup>

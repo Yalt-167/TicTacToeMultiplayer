@@ -1,12 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-
-#include <SFML/Graphics.hpp>
-#include <SFML/window.hpp>
-#include <SFML/system.hpp>
-
 class Grid
 {
 public:

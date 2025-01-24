@@ -1,17 +1,17 @@
-#include <iostream>
-#include <cstdlib>
-#include<functional>
-#include <thread>
-#include <chrono>
 
 #include "Game.hpp"
 #include "Player.hpp"
+
+#include "SFML/Graphics.hpp"
 
 Game::Game(bool isServer_)
 {
 	isServer = isServer_;
 
-	if (isServer) { return; }
+	if (isServer)
+	{
+		return;
+	}
 
 	window = new Window(600, 600, "Tic");
 }
@@ -24,12 +24,15 @@ Game::~Game()
 
 void Game::Run()
 {
-	if (!isServer) { Render(); }
+	if (!isServer) { Render(); } 
 
 	while (playing)
 	{
 		Play();
-		Render();
+		if (!isServer)
+		{
+			Render();
+		}
 		VerifyWin();
 	}
 }

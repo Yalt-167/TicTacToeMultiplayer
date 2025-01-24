@@ -1,12 +1,7 @@
-#include <iostream>
 
-#include <SFML/Graphics.hpp>
-#include <SFML/window.hpp>
-#include <SFML/system.hpp>
 
 #include "Grid.hpp"
 #include "Game.hpp"
-
 
 int main(int argc, char** argv)
 {
@@ -20,6 +15,7 @@ int main(int argc, char** argv)
 		std::cout << "Enter your username: " << std::endl;
 		std::cin >> username;
 	}
+	
 
     Game(isServer).Run();
 }
