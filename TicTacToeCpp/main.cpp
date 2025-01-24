@@ -4,6 +4,7 @@
 #include "SFML/window.hpp"
 #include "SFML/system.hpp"
 
+#include "Online.hpp"
 #include "Grid.hpp"
 #include "Game.hpp"
 
@@ -21,5 +22,7 @@ int main(int argc, char** argv)
 		std::cin >> username;
 	}
 
-    Game(isServer).Run();
+    //Game(isServer).Run();
+
+	return 0;
 }
