@@ -2,8 +2,6 @@
 #include "Game.hpp"
 #include "Player.hpp"
 
-#include "SFML/Graphics.hpp"
-
 Game::Game(bool isServer_)
 {
 	isServer = isServer_;
