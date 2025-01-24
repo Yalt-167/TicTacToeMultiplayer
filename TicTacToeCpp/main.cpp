@@ -7,7 +7,6 @@
 #include "Grid.hpp"
 #include "Game.hpp"
 
-
 int main(int argc, char** argv)
 {
 	if (argc < 2) { throw std::exception("Don t ever waste my time like this"); }
@@ -20,6 +19,7 @@ int main(int argc, char** argv)
 		std::cout << "Enter your username: " << std::endl;
 		std::cin >> username;
 	}
+	
 
     Game(isServer).Run();
 }
