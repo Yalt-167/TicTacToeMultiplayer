@@ -4,34 +4,27 @@
 #include <thread>
 #include <chrono>
 
-
 #include "Game.hpp"
 #include "Player.hpp"
-#include "HumanPlayer.hpp"
 
-Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
+Game::Game(bool isServer_)
 {
-	players[0] = new HumanPlayer('X');
-	players[1] = new HumanPlayer('O');
+	isServer = isServer_;
 
-	twoAIs = !(playerOneIsHuman || playerTwoIsHuman);
-	//inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
-
-	doClearConsole = doClearConsole_;
+	if (isServer) { return; }
 
 	window = new Window(600, 600, "Tic");
 }
 
+
 Game::~Game()
 {
-	delete[] players;
-
 	delete window;
 }
 
 void Game::Run()
 {
-	Render();
+	if (!isServer) { Render(); }
 
 	while (playing)
 	{
@@ -43,31 +36,8 @@ void Game::Run()
 
 void Game::Play()
 {
-	grid.Place(players[(int)currentPlayerIsO]->GatherInput(grid, window->RenderWindow), currentPlayerIsO);
+	grid.Place(players[(int)currentPlayerIsO].GatherInput(grid, window->RenderWindow), currentPlayerIsO);
 	turns++;
-}
-
-bool Game::InputIsInvalid(int input)
-{
-	if (input < 1)
-	{
-		std::cout << "This input is too small" << std::endl;
-		return true;
-	}
-
-	if (input > 9)
-	{
-		std::cout << "This input is too big" << std::endl;
-		return true;
-	}
-
-	if (!grid.IsSlotEmpty(input - 1))
-	{
-		std::cout << "There is a symbol in this slot already" << std::endl;
-		return true;
-	}
-
-	return false;
 }
 
 void Game::VerifyWin()
@@ -85,21 +55,11 @@ void Game::VerifyWin()
 	}
 		
 	currentPlayerIsO = !currentPlayerIsO;
-
-	if (!twoAIs) { return; }
-
-	std::this_thread::sleep_for(std::chrono::seconds(1)); // so we can actually see what happens
 }
 
 void Game::Render()
 {
-	if (doClearConsole)
-	{
-		system("cls");
-	}
-
 	window->RenderWindow->clear(sf::Color::Black);
-	grid.RenderToConsole();
 	grid.Render(window->RenderWindow);
 	window->Rename(currentPlayerIsO ? "Tic" : "Tac");
 	window->RenderWindow->display();
@@ -110,11 +70,6 @@ void Game::Reset()
 	turns = 0;
 
 	grid.Clear();
-
-	for (int i = 0; i < 2; i++)
-	{
-		players[i]->Reset();
-	}
 
 	Render();
 

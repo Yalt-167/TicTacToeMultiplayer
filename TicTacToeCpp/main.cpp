@@ -7,33 +7,19 @@
 #include "Grid.hpp"
 #include "Game.hpp"
 
-#define SKIP_SFML_STUFF
-constexpr auto HUMAN_PLAYER = true;
-constexpr auto DO_CLEAR_CONSOLE = true;
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
-#ifdef SKIP_SFML_STUFF  
-    Game(HUMAN_PLAYER, !HUMAN_PLAYER, DO_CLEAR_CONSOLE).Run();
-#else
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Window Title");
-    auto shapePtr = new sf::CircleShape(200.f, 100);
-    shapePtr->setFillColor(sf::Color(204, 77, 5)); // Color circle
-    shapePtr->setPosition(200, 200); // Center circle
+	if (argc < 2) { throw std::exception("Don t ever waste my time like this"); }
 
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+	bool isServer = strcmp(argv[1], "Server") == 0;
 
-        window.clear(sf::Color(18, 33, 43)); // Color background
-        window.draw(*shapePtr);
-        window.display();
+	std::string username;
+	if (!isServer)
+	{
+		std::cout << "Enter your username: " << std::endl;
+		std::cin >> username;
+	}
 
-    }
-#endif
+    Game(isServer).Run();
 }

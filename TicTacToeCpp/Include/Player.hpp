@@ -9,9 +9,7 @@
 class Player
 {
 public:
-	Player() = default;
 	Player(char symbol);
-	virtual int GatherInput(Grid& grid, sf::RenderWindow* renderWindow) = 0;
-	virtual void Reset();
+	int GatherInput(Grid& grid, sf::RenderWindow* renderWindow);
 	char Symbol;
 };
