@@ -21,7 +21,6 @@
 #pragma comment(lib, "ws2_32.lib") // just found out about this: this is great
 
 
-
 constexpr const int PORT = 54000;
 constexpr const int BUFFER_SIZE = 1024;
 

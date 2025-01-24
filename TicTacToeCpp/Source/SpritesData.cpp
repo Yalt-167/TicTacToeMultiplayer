@@ -1,5 +1,6 @@
 #include "SpritesData.hpp"
 
+
 int SpritesData::GridSpriteSize = 0;
 int SpritesData::CellSize = 0;
 int SpritesData::SymbolSpritesSize = 0;

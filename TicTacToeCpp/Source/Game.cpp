@@ -1,6 +1,6 @@
-
 #include "Game.hpp"
 #include "Player.hpp"
+
 
 Game::Game(bool isServer_)
 {

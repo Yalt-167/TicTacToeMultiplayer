@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Grid.hpp"
 #include "Window.hpp"
 #include "SpritesData.hpp"

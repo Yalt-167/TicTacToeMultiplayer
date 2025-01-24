@@ -9,18 +9,26 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Debug-Client|x64 = Debug-Client|x64
+		Debug-Client|x86 = Debug-Client|x86
+		Release_Client|x64 = Release_Client|x64
+		Release_Client|x86 = Release_Client|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x64.ActiveCfg = Debug|x64
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x64.Build.0 = Debug|x64
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x86.ActiveCfg = Debug|Win32
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x86.Build.0 = Debug|Win32
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x64.ActiveCfg = Release|x64
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x64.Build.0 = Release|x64
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x86.ActiveCfg = Release|Win32
-		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x86.Build.0 = Release|Win32
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x64.ActiveCfg = Debug-Server|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x64.Build.0 = Debug-Server|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug|x86.ActiveCfg = Debug-Server|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug-Client|x64.ActiveCfg = Debug-Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug-Client|x64.Build.0 = Debug-Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Debug-Client|x86.ActiveCfg = Debug-Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release_Client|x64.ActiveCfg = Release_Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release_Client|x64.Build.0 = Release_Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release_Client|x86.ActiveCfg = Release_Client|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x64.ActiveCfg = Release-Server|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x64.Build.0 = Release-Server|x64
+		{4CDE5495-108A-4181-B75C-91134A0FDE94}.Release|x86.ActiveCfg = Release-Server|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

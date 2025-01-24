@@ -1,6 +1,7 @@
 #include "Player.hpp"
 #include "SpritesData.hpp"
 
+
 Player::Player(char symbol)
 {
 	Symbol = symbol;
