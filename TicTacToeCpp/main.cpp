@@ -6,7 +6,6 @@
 
 #include "Grid.hpp"
 #include "Game.hpp"
-#include "Tree.hpp"
 
 #define SKIP_SFML_STUFF
 constexpr auto HUMAN_PLAYER = true;

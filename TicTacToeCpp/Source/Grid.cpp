@@ -150,34 +150,6 @@ int Grid::EvaluateGrid(const std::vector<std::vector<char>>& grid_, char symbolT
 	return 0;
 }
 
-// STATIC
-int Grid::GetDifference(const std::vector<std::vector<char>>& firstGrid, const std::vector<std::vector<char>>& secondGrid)
-{
-	for (int i = 0; i < 9; i++)
-	{
-		if (firstGrid[i / 3][i % 3] != secondGrid[i / 3][i % 3])
-		{
-			return i;
-		}
-	}
-
-	throw new std::runtime_error("Same grid somehow");
-}
-
-// STATIC
-int Grid::GetDifference(const Grid& firstGrid, const Grid& secondGrid)
-{
-	for (int i = 0; i < 9; i++)
-	{
-		if (firstGrid.grid[i / 3][i % 3] != secondGrid.grid[i / 3][i % 3])
-		{
-			return i;
-		}
-	}
-
-	throw new std::runtime_error("Same grid somehow");
-}
-
 void Grid::Clear()
 {
 	for (int row = 0; row < 3; row++)

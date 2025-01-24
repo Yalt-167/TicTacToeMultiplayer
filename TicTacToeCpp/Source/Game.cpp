@@ -8,12 +8,11 @@
 #include "Game.hpp"
 #include "Player.hpp"
 #include "HumanPlayer.hpp"
-#include "CPUPlayer.hpp"
 
 Game::Game(bool playerOneIsHuman, bool playerTwoIsHuman, bool doClearConsole_)
 {
-	players[0] = playerOneIsHuman ? (Player*)new HumanPlayer('X') : (Player*)new CPUPlayer('X');
-	players[1] = playerTwoIsHuman ? (Player*)new HumanPlayer('O') : (Player*)new CPUPlayer('O');
+	players[0] = new HumanPlayer('X');
+	players[1] = new HumanPlayer('O');
 
 	twoAIs = !(playerOneIsHuman || playerTwoIsHuman);
 	//inputValidationPredicate = std::bind(&Game::InputIsInvalid, this, std::placeholders::_1);
