@@ -1,7 +1,6 @@
-
-
 #include "Grid.hpp"
 #include "Game.hpp"
+
 
 int main(int argc, char** argv)
 {
