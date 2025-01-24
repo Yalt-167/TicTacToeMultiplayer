@@ -109,6 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ForcedIncludeFiles>$(ProjectDir)Include/Common.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <ForcedIncludeFiles>$(ProjectDir)Include/Common.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,9 +143,13 @@
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\ClientSocket.hpp" />
+    <ClInclude Include="Include\Common.hpp" />
     <ClInclude Include="Include\Game.hpp" />
     <ClInclude Include="Include\Grid.hpp" />
     <ClInclude Include="Include\Player.hpp" />
+    <ClInclude Include="Include\ServerSocket.hpp" />
+    <ClInclude Include="Include\Socket.hpp" />
     <ClInclude Include="Include\SpritesData.hpp" />
     <ClInclude Include="Include\Window.hpp" />
   </ItemGroup>
