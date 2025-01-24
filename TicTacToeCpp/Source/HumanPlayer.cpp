@@ -1,9 +1,9 @@
 #include <iostream>
 #include <functional>
 
-#include "SFML/Window.hpp"
-#include "SFML/Graphics.hpp"
-#include "SFML/System.hpp"
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 
 #include "HumanPlayer.hpp"
 #include "SpritesData.hpp"
