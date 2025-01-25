@@ -22,7 +22,7 @@
 
 
 constexpr const int PORT = 54000;
-constexpr const int BUFFER_SIZE = 1024;
+constexpr const int CHAT_BUFFER_SIZE = 1024;
 
 class Discarder
 {
@@ -33,3 +33,57 @@ private:
 };
 
 constexpr inline Discarder _;
+
+class Game_
+{
+public:
+	virtual void Run() = 0;
+protected:
+private:
+};
+
+
+enum class PacketSendTarget
+{
+	Broadcast,
+	NotSelf
+};
+
+enum class SerializationHeaders
+{
+	Play,
+	ChatMessage,
+};
+
+struct Header
+{
+public:
+	int What;
+	int Size;
+	
+	Header& Set(int what, int size)
+	{
+		What = what;
+		Size = size;
+
+		return *this;
+	}
+	Header& Set(SerializationHeaders what, int size)
+	{
+		What = (int)what;
+		Size = size;
+
+		return *this;
+	}
+private:
+};
+
+
+// packets constructed a such
+// send packets two by two
+
+// header
+// <what><size> -> <int, int>
+
+// then
+// <body> of size header.<size>
