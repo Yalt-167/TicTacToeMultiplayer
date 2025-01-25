@@ -1,5 +1,7 @@
 #include "Grid.hpp"
-#include "Game.hpp"
+
+#include "GameServer.hpp"
+#include "GameClient.hpp"
 
 
 int main(int argc, char** argv)
@@ -14,7 +16,7 @@ int main(int argc, char** argv)
 		std::cout << "Enter your username: " << std::endl;
 		std::cin >> username;
 	}
-	
 
-    Game(isServer).Run();
+	Game_* game = (isServer ? (Game_*)new GameServer() : (Game_*)new GameClient(username));
+	game->Run();
 }
