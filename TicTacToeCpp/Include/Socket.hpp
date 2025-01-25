@@ -32,7 +32,7 @@ protected:
         }
     }
 
-    void Cleanup()
+    void Cleanup() const
     {
         closesocket(socket_);
 
@@ -40,9 +40,24 @@ protected:
     }
 public:
     virtual void Run() = 0;
+    void Send(const char* data, SerializationHeaders what)
+    {
+        Send(data, what, (int)strlen(data));
+    }
+
+    void Send(const char* data, SerializationHeaders what, int size)
+    {
+        memcpy(headerBuffer, &header.Set(what, size), sizeof(Header));
+        _ = send(socket_, headerBuffer, sizeof(Header), 0);
+
+        _ = send(socket_, data, size, 0);
+    }
 
 protected:
-    SOCKET socket_; 
+    SOCKET socket_;
     WSADATA wsaData; // contains infos about WIndows sockets impl
     sockaddr_in serverAddr = sockaddr_in(); // for specifying IPv4 socket addresses && protocols
+
+    Header header;
+    char headerBuffer[sizeof(Header)];
 };
