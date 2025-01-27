@@ -15,14 +15,14 @@ public:
     ~ClientSocket()
     {
         listenerThread.join();
-        writerThread.join();
+        chatWriterThread.join();
 
         Cleanup();
     }
 private:
     void Init()
     {
-        //serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // loopback address -> basically connect to self // lowkey lonely behaviour
+        //serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // localhost address -> basically connect to self // lowkey lonely behaviour
 
         switch (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr))
         {
@@ -44,12 +44,16 @@ private:
 
         if (connect(socket_, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) // connecting to server
         {
-            std::cerr << "Couldn connect to server" << std::endl;
+            std::cerr << "Couldn t connect to server" << std::endl;
             Cleanup();
-            throw std::exception("Couldn connect to server");
+            throw std::exception("Couldn t connect to server");
         }
 
-        _  = send(socket_, userName.c_str(), (int)userName.size(), 0);
+        int nameSize = (int)userName.size() + 1; // include null terminator
+        _ = send(socket_, reinterpret_cast<char*>(&header.Set(SerializationHeaders::Login, nameSize)), sizeof(PacketHeader), 0);
+
+        _ = send(socket_, userName.c_str(), nameSize, 0);
+
         std::cout << "Should be connected to the server ^^" << std::endl;
     }
 public:
@@ -62,47 +66,118 @@ public:
             }
         );
 
-        writerThread = std::thread(
+        chatWriterThread = std::thread(
             [this]()
             {
-                Write();
+                WriteToChat();
             }
         );
     }
-
-    void Write()
+private:
+    void WriteToChat()
     {
         std::cin.ignore(); // clears cin s buffer
 
-        char userInput[BUFFER_SIZE];
+        char userInput[CHAT_BUFFER_SIZE];
+        userInput[CHAT_BUFFER_SIZE - 1] = '\0';
 
+        PacketHeader header { (int)SerializationHeaders::ChatMessage, 0 };
+        
         while (true)
         {
-            
             std::cout << userName << ": ";
-            std::cin.getline(userInput, BUFFER_SIZE);
+            std::cin.getline(userInput, CHAT_BUFFER_SIZE);
 
             if (strcmp(userInput, ":q") == 0) { break; } // ^^ we be WIMing
 
-            _ = send(socket_, userInput, BUFFER_SIZE, 0);
+            int messageSize = (int)strlen(userInput) + 1;
+            
+            header.Size = messageSize;
+            _ = send(socket_, reinterpret_cast<char*>(&header), sizeof(PacketHeader), 0);
+
+            _ = send(socket_, userInput, messageSize, 0);
         }
     }
 
     void Listen()
     {
-        char dataBuffer[BUFFER_SIZE];
-
+        char header[sizeof(PacketHeader)];
         while (true)
         {
-            if (recv(socket_, dataBuffer, BUFFER_SIZE, 0) > 0)
+            if (recv(socket_, header, sizeof(PacketHeader), 0) > 0) // only receive the header
             {
-                std::cout << "\r" << dataBuffer << std::endl;
-                std::cout << userName << ": ";
-            }
+                int* header_ = reinterpret_cast<int*>(header);
+                std::cerr << "SerializationHeader" << header_[0] << std::endl;
+                switch ((SerializationHeaders)header_[0])
+                {
+                    case SerializationHeaders::ChatMessage:
+                        HandleChatMessage(header_[1]);
+                        break;
+                    
+
+                    case SerializationHeaders::Play:
+                        HandlePlay();
+                        break;
+                    
+                    default:
+                        std::cerr << "Invalid SerializationHeader" << header_[0] << std::endl;
+                        break;
+                }
+            } 
         }
     }
-private:
+
+    void HandleChatMessage(int bufferSize)
+    {
+        char* chatBuffer = new char[bufferSize];
+
+        _ = recv(socket_, chatBuffer, bufferSize, 0);
+
+        std::cout << "\r" << chatBuffer << std::endl;
+        std::cout << userName << ": ";
+    }
+
+    void HandlePlay()
+    {
+        char play[sizeof(int)];
+
+        _ = recv(socket_, play, sizeof(int), 0);
+
+        switch ((Plays)play[0])
+        {
+            case Plays::InvalidPlay:
+                std::cout << "\r" << "InvalidPlay" << std::endl;
+                std::cout << userName << ": ";
+                break;
+
+            case Plays::ValidPlay:
+                std::cout << "\r" << "Nice" << std::endl;
+                std::cout << userName << ": ";
+                break;
+
+            case Plays::PlayerOneWon:
+                std::cout << "\r" << "Player 1 won" << std::endl;
+                std::cout << userName << ": ";
+                break;
+
+            case Plays::Draw:
+                std::cout << "\r" << "Draw" << std::endl;
+                std::cout << userName << ": ";
+                break;
+
+            case Plays::PlayerTwoWon:
+                std::cout << "\r" << "Player 2 won" << std::endl;
+                std::cout << userName << ": ";
+                break;
+
+            default:
+                std::cout << "\r" << "Someone played: " << play << std::endl;
+                std::cout << userName << ": ";
+                break;
+        }
+    }
+
     std::string userName;
     std::thread listenerThread;
-    std::thread writerThread;
+    std::thread chatWriterThread;
 };
