@@ -15,8 +15,6 @@ public:
     }
     void Run() override
     {
-        char buffer[CHAT_BUFFER_SIZE];
-
         while (true)
         {
             sockaddr_in clientAddr;
@@ -29,22 +27,26 @@ public:
                 continue;
             }
 
-            if (recv(clientSocket, buffer, CHAT_BUFFER_SIZE, 0) <= 0)
+            if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
             {
                 std::cerr << "Gone too soon" << std::endl;
                 continue;
             }
 
+            int nameSize = reinterpret_cast<int*>(headerBuffer)[1] + 1; // include null terminator
+            char* nameBuffer = new char[nameSize];
+          
+            _ = recv(clientSocket, nameBuffer, nameSize, 0);
 
             clientSockets[connectedClients] = clientSocket;
             clientThreads[connectedClients] = std::thread(
                 [=]()
                 {
-                    HandleClient(clientSocket, buffer, connectedClients++); // hopefully this ++ doesn t cause concurrency issues
+                    HandleClient(clientSocket, nameBuffer, connectedClients++);
                 }
             );
 
-            std::cout << buffer << " connected." << std::endl;
+            std::cout << nameBuffer << " connected" << std::endl;
         }
 
         for (int i = 0; i < clientThreads.size(); i++)
@@ -57,6 +59,7 @@ public:
 
         Cleanup();
     }
+
     int GetConnectedClientsCount() const
     {
         return connectedClients;
@@ -90,26 +93,31 @@ private:
     std::vector<SOCKET> clientSockets;
     int connectedClients = 0;
 
-    void HandleClient(SOCKET clientSocket, const std::string& name, int clientNumber)
+    void HandleClient(SOCKET clientSocket, const char* name, int clientNumber)
     {
-        char headerBuffer[sizeof(Header)];
+        char headerBuffer[sizeof(PacketHeader)];
 
-        int nameLength = (int)name.length() + 3; // + 3 ->account for :<space> + null terminator
         while (true)
         {
-            int bytesReceived = recv(clientSocket, headerBuffer, sizeof(Header), 0);
-            if (bytesReceived <= 0)
+            if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
             {
-                std::cout << name  << " disconnected" << std::endl;
+                std::cout << name << " disconnected" << std::endl;
                 connectedClients--;
 
                 break;
             }
 
-            switch ((SerializationHeaders)headerBuffer[0])
+            int* header_ = reinterpret_cast<int*>(headerBuffer);
+            std::cerr << "SerializationHeader" << header_[0] << std::endl;
+            switch ((SerializationHeaders)header_[0])
             {
+                case SerializationHeaders::Login:
+                    std::cout << "Got login packet from " << clientNumber << std::endl;
+                    break;
+
                 case SerializationHeaders::ChatMessage:
-                    HandleChatMessage(clientSocket, name, clientNumber);
+                    std::cout << "Got chat packet from " << clientNumber << std::endl;
+                    HandleChatMessage(clientSocket, name, clientNumber, header_[1]);
                     break;
 
                 case SerializationHeaders::Play:
@@ -119,33 +127,47 @@ private:
 
         }
 
+        delete[] name;
+
         _ = closesocket(clientSocket);
     }
 
-    void HandleChatMessage(SOCKET& clientSocket, const std::string& name, int clientNumber)
+    void HandleChatMessage(SOCKET& clientSocket, const char* name, int clientNumber, int messageSize)
     {
-        char message[CHAT_BUFFER_SIZE];
-        char chatBuffer[CHAT_BUFFER_SIZE];
+        int nameLength = (int)strlen(name); 
+        int totalSize = nameLength + messageSize + 3; // + 3 -> account for ": " + null terminator
+        char* message = new char[totalSize];
+        char* chatBuffer = new char[messageSize];
 
-        _ = recv(clientSocket, chatBuffer, CHAT_BUFFER_SIZE, 0);
+        _ = recv(clientSocket, chatBuffer, messageSize, 0);
 
         std::cout << name << ": " << chatBuffer << std::endl;
 
-        _ = strcpy_s(message, name.c_str());
-        _ = strcat_s(message, ": ");
-        _ = strcat_s(message, chatBuffer);
-
         if (connectedClients < 2)
         {
+            std::cout << "Message not sent because there is only one client connected" << std::endl;
+            delete[] message;
+            delete[] chatBuffer;
             return; // why even bother you are lonely AF just give up
         }
 
-        //if (bytesReceived + nameLength > CHAT_BUFFER_SIZE)
-        //{
-        //    // account for this at some point
-        //}
+        _ = strcpy_s(message, totalSize, name);
+        _ = strcpy_s(message + nameLength, totalSize, ": ");
+        _ = strcpy_s(message + nameLength + 2, totalSize, chatBuffer);
+        message[totalSize - 1] = '\0';
 
-        _ = send(clientSockets[(int)(!(bool)clientNumber)], message, CHAT_BUFFER_SIZE, 0); // lowkey sinning
+        int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning
+        _ = send(
+            clientSockets[otherClientIndex],
+            reinterpret_cast<char*>(&header.Set(SerializationHeaders::ChatMessage, totalSize)),
+            sizeof(PacketHeader),
+            0
+        );
+
+        _ = send(clientSockets[otherClientIndex], message, totalSize, 0); 
+
+        delete[] chatBuffer;
+        //delete[] message // fails for some reason
     }
 
     void HandlePlay(SOCKET& clientSocket, int clientNumber)
@@ -154,10 +176,9 @@ private:
 
         _ = recv(clientSocket, playBuffer, sizeof(int), 0);
 
-        int playValidity = PlayIsValid(*reinterpret_cast<int*>(playBuffer)) ? 9 : 10;
+        int playValidity = (int)(PlayIsValid(*reinterpret_cast<int*>(playBuffer)) ? Plays::InvalidPlay : Plays::ValidPlay);
 
-        memcpy(playBuffer, &playValidity, sizeof(int));
-        Send(playBuffer, SerializationHeaders::Play);
+        Send(reinterpret_cast<char*>(&playValidity), SerializationHeaders::Play);
     }
 
     bool PlayIsValid(int play)
