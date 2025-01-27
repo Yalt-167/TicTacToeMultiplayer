@@ -1,7 +1,9 @@
 #include "Online.hpp"
 
-//initialise WinSock2
-bool initWinSock2() {
+
+
+
+bool SocketController::initWinSock2() {
 
     WSADATA wsaData;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -13,19 +15,20 @@ bool initWinSock2() {
     return true;
 }
 
-//creer une socket
-SOCKET createSocket() {
+
+SOCKET SocketController::createSocket() {
     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET) {
         std::cerr << "Socket creation failed: " << WSAGetLastError() << std::endl;
         WSACleanup();
         return 1;
     }
+    sockets.push_back(sock);
     return sock;
 }
 
-//prépare un port a une connection(serveur)
-bool bind(SOCKET sock, int port) {
+
+bool SocketController::Bind(SOCKET sock, int port) {
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY; // Accepte toutes les connexions entrantes.
@@ -40,8 +43,8 @@ bool bind(SOCKET sock, int port) {
     return true;
 }
 
-//connect une socket a un port(client)
-bool connect(SOCKET sock, int port) {
+
+bool SocketController::Connect(SOCKET& sock, int port) {
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
@@ -56,8 +59,8 @@ bool connect(SOCKET sock, int port) {
     return true;
 }
 
-//met en écoute la socket(serveur)
-bool listen(SOCKET sock) {
+
+bool SocketController::Listen(SOCKET sock) {
     if (listen(sock, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Listen failed: " << WSAGetLastError() << std::endl;
         closesocket(sock);
@@ -67,46 +70,73 @@ bool listen(SOCKET sock) {
     return true;
 }
 
-//rempli la socket(client)
-bool accept(SOCKET& clientSocket, SOCKET serverSocket) {
+
+bool SocketController::Accept(SOCKET& clientSocket, SOCKET& serverSocket) {
     clientSocket = accept(serverSocket, nullptr, nullptr);
     if (clientSocket == INVALID_SOCKET) {
         std::cerr << "Accept failed: " << WSAGetLastError() << std::endl;
-        closesocket(serverSocket);
-        WSACleanup();
         return false;
     }
+
+    std::cout << "Client Connected" << std::endl;
+    
+    speakThreads.push_back(std::thread(&SocketController::speak, this, clientSocket));
     return true;
 }
-//envoie un message sur la socket serveur(client)
-bool send(SOCKET sock, std::string message) {
-    int bytesSent = send(sock, message.c_str(), strlen(message.c_str()), 0);
+
+
+bool SocketController::Send(SOCKET sock, std::string message, std::string username) {
+    int bytesSent = send(sock, (username + " : " + message).c_str(), strlen((username + " : " + message).c_str()), 0);
     if (bytesSent == SOCKET_ERROR) {
         std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
         return false;
     }
+    std::cout << "Message sent" << std::endl;
     return true;
 }
 
-//recoi un message sur une socket d'un client(serveur)
-void receive(SOCKET sock) {
-    char buffer[512];
-    int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Null-terminate le message reçu.
-        std::cout << "Received: " << buffer << std::endl;
+
+char* SocketController::receive(SOCKET sock)
+{
+    int bufferSize = 512;
+    char* buffer = new char[bufferSize];
+    while (true)
+    {
+        int bytesReceived = recv(sock, buffer, bufferSize - 1, 0);
+        if (bytesReceived > 0) {
+            buffer[bytesReceived] = '\0'; // Null-terminate le message reçu.
+            std::cout << buffer << std::endl;
+            break;
+            return buffer;
+        }
+        else if (bytesReceived == 0) {
+            std::cout << "Connection closed by peer." << std::endl;
+        }
+
     }
-    else if (bytesReceived == 0) {
-        std::cout << "Connection closed by peer." << std::endl;
-    }
+    /*
     else {
         std::cerr << "Recv failed: " << WSAGetLastError() << std::endl;
+    }*/
+}
+
+void SocketController::speak(SOCKET clientSocket) {
+    while (true)
+    {
+        char* msg = receive(clientSocket);
+        for (const SOCKET& sock : sockets) {
+            if (sock != clientSocket) {
+                send(sock, msg, strlen(msg), 0);
+                std::cout << "test" << std::endl;
+            }
+        }
     }
 }
 
 
 
-void closeAll(SOCKET clientSocket, SOCKET serverSocket) {
+
+void SocketController::closeAll(SOCKET clientSocket, SOCKET serverSocket) {
     closesocket(clientSocket);
     closesocket(serverSocket);
     WSACleanup();
