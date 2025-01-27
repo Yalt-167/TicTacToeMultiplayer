@@ -51,24 +51,34 @@ enum class PacketSendTarget
 
 enum class SerializationHeaders
 {
+	Login,
 	Play,
 	ChatMessage,
 };
 
-struct Header
+enum class Plays
+{
+	InvalidPlay = 9,
+	ValidPlay = 10,
+	PlayerOneWon = 11,
+	Draw = 12,
+	PlayerTwoWon = 13,
+};
+
+struct PacketHeader
 {
 public:
 	int What;
 	int Size;
 	
-	Header& Set(int what, int size)
+	PacketHeader& Set(int what, int size)
 	{
 		What = what;
 		Size = size;
 
 		return *this;
 	}
-	Header& Set(SerializationHeaders what, int size)
+	PacketHeader& Set(SerializationHeaders what, int size)
 	{
 		What = (int)what;
 		Size = size;
@@ -79,11 +89,11 @@ private:
 };
 
 
-// packets constructed a such
+// packets constructed as such:
 // send packets two by two
 
 // header
-// <what><size> -> <int, int>
+// <what><size> -> <int, int> // can easily infer size tho (except for chat msg)
 
 // then
 // <body> of size header.<size>
