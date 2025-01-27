@@ -44,11 +44,9 @@ public:
     {
         Send(data, what, (int)strlen(data));
     }
-
     void Send(const char* data, SerializationHeaders what, int size)
     {
-        memcpy(headerBuffer, &header.Set(what, size), sizeof(Header));
-        _ = send(socket_, headerBuffer, sizeof(Header), 0);
+        _ = send(socket_, reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
 
         _ = send(socket_, data, size, 0);
     }
@@ -58,6 +56,6 @@ protected:
     WSADATA wsaData; // contains infos about WIndows sockets impl
     sockaddr_in serverAddr = sockaddr_in(); // for specifying IPv4 socket addresses && protocols
 
-    Header header;
-    char headerBuffer[sizeof(Header)];
+    PacketHeader header;
+    char headerBuffer[sizeof(PacketHeader)];
 };
