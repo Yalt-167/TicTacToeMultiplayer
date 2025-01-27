@@ -3,6 +3,7 @@
 #include "Grid.hpp"
 #include "Player.hpp"
 #include "Window.hpp"
+#include "SpritesData.hpp"
 
 
 class Game
