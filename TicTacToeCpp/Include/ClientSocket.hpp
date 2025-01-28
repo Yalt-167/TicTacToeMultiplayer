@@ -50,7 +50,7 @@ private:
         }
 
         int nameSize = (int)userName.size() + 1; // include null terminator
-        _ = send(socket_, reinterpret_cast<char*>(&header.Set(SerializationHeaders::Login, nameSize)), sizeof(PacketHeader), 0);
+        _ = send(socket_, reinterpret_cast<char*>(&header.Set(SerializationHeaders::ConnectionEvent, nameSize)), sizeof(PacketHeader), 0);
 
         _ = send(socket_, userName.c_str(), nameSize, 0);
 
@@ -72,6 +72,13 @@ public:
                 WriteToChat();
             }
         );
+    }
+
+    void Send(const char* data, SerializationHeaders what, int size)
+    {
+        _ = send(socket_, reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+
+        _ = send(socket_, data, size, 0);
     }
 private:
     void WriteToChat()
@@ -107,23 +114,33 @@ private:
             if (recv(socket_, header, sizeof(PacketHeader), 0) > 0) // only receive the header
             {
                 int* header_ = reinterpret_cast<int*>(header);
-                std::cerr << "SerializationHeader" << header_[0] << std::endl;
+                std::cerr << "\rPacketSize" << header_[1] << std::endl;
+                std::cerr << "\rSerializationHeader" << header_[0] << std::endl;
                 switch ((SerializationHeaders)header_[0])
                 {
                     case SerializationHeaders::ChatMessage:
+                        std::cout << "\rReceived a Chat" << std::endl;
                         HandleChatMessage(header_[1]);
                         break;
                     
 
                     case SerializationHeaders::Play:
+                        std::cerr << "\rShouln t have received SerializationHeaders::Play" << std::endl;
+                        throw std::exception("^^");
+                        break;
+
+                    case SerializationHeaders::PlayResult:
+                        std::cout << "\rReceived a PlayResult" << std::endl;
                         HandlePlay();
                         break;
                     
                     default:
-                        std::cerr << "Invalid SerializationHeader" << header_[0] << std::endl;
+                        std::cerr << "\rInvalid SerializationHeader" << header_[0] << std::endl;
                         break;
                 }
             } 
+
+            std::cout << userName << ": ";
         }
     }
 
@@ -139,42 +156,43 @@ private:
 
     void HandlePlay()
     {
-        char play[sizeof(int)];
+        char play[sizeof(int) * 3];
 
-        _ = recv(socket_, play, sizeof(int), 0);
+        _ = recv(socket_, play, sizeof(int) * 2, 0);
 
-        switch ((Plays)play[0])
+        int* plays = reinterpret_cast<int*>(&play);
+
+        switch ((GameResult)plays[0])
         {
-            case Plays::InvalidPlay:
-                std::cout << "\r" << "InvalidPlay" << std::endl;
-                std::cout << userName << ": ";
-                break;
-
-            case Plays::ValidPlay:
-                std::cout << "\r" << "Nice" << std::endl;
-                std::cout << userName << ": ";
-                break;
-
-            case Plays::PlayerOneWon:
+            case GameResult::PlayerOneWon:
                 std::cout << "\r" << "Player 1 won" << std::endl;
-                std::cout << userName << ": ";
                 break;
 
-            case Plays::Draw:
+            case GameResult::Draw:
                 std::cout << "\r" << "Draw" << std::endl;
-                std::cout << userName << ": ";
                 break;
 
-            case Plays::PlayerTwoWon:
+            case GameResult::PlayerTwoWon:
                 std::cout << "\r" << "Player 2 won" << std::endl;
-                std::cout << userName << ": ";
                 break;
 
+            case GameResult::None:
             default:
-                std::cout << "\r" << "Someone played: " << play << std::endl;
-                std::cout << userName << ": ";
                 break;
         }
+
+        if ((Plays)plays[1] == Plays::InvalidPlay)
+        {
+            std::cout << "InvalidPlay" << std::endl;
+        }
+        else
+        {
+            std::cout << "Someone played: " << plays[1] << std::endl;
+            Grid::Place(plays[1], 1);
+        }
+
+        std::cout << userName << ": ";
+        
     }
 
     std::string userName;
