@@ -65,6 +65,24 @@ public:
         return connectedClients;
     }
     
+    void Send(const char* data, SerializationHeaders what, int size, PacketSendTarget target)
+    {
+        if (target == PacketSendTarget::Broadcast)
+        {
+            for (int i = 0; i < clientSockets.size(); i++)
+            {
+                _ = send(clientSockets[i], reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+
+                _ = send(clientSockets[i], data, size, 0);
+            }
+        }
+        else
+        {
+            _ = send(clientSockets[(int)target], reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+
+            _ = send(clientSockets[(int)target], data, size, 0);
+        }       
+    }
 private:
     void Init()
     {
@@ -108,19 +126,20 @@ private:
             }
 
             int* header_ = reinterpret_cast<int*>(headerBuffer);
-            std::cerr << "SerializationHeader" << header_[0] << std::endl;
+            std::cerr << "SerializationHeader" << header_[0] << " | Size: " << header_[1] << std::endl;
             switch ((SerializationHeaders)header_[0])
             {
-                case SerializationHeaders::Login:
-                    std::cout << "Got login packet from " << clientNumber << std::endl;
+                case SerializationHeaders::ConnectionEvent:
+                    std::cout << "Got ConnectionEvent packet from " << clientNumber << std::endl;
                     break;
 
                 case SerializationHeaders::ChatMessage:
-                    std::cout << "Got chat packet from " << clientNumber << std::endl;
+                    std::cout << "Got Chat packet from " << clientNumber << std::endl;
                     HandleChatMessage(clientSocket, name, clientNumber, header_[1]);
                     break;
 
                 case SerializationHeaders::Play:
+                    std::cout << "Got Play packet from " << clientNumber << std::endl;
                     HandlePlay(clientSocket, clientNumber);
                     break;
             }
@@ -176,13 +195,66 @@ private:
 
         _ = recv(clientSocket, playBuffer, sizeof(int), 0);
 
-        int playValidity = (int)(PlayIsValid(*reinterpret_cast<int*>(playBuffer)) ? Plays::InvalidPlay : Plays::ValidPlay);
+        int returnBuffer[3]; // wether the game state has changed + the play itself + wether u can play
 
-        Send(reinterpret_cast<char*>(&playValidity), SerializationHeaders::Play);
+        int playRequest = *reinterpret_cast<int*>(playBuffer);
+
+        bool validPlay = TryPlay(playRequest, clientNumber);
+
+
+        if (validPlay)
+        {
+            if (Grid::CheckWin())
+            {
+                returnBuffer[0] = ((int)GameResult::PlayerOneWon + clientNumber);
+                // bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
+                // im dogshit at explaining things but I swear it makes sense
+            }
+            else if (Grid::CheckDraw())
+            {
+                returnBuffer[0] = (int)GameResult::Draw;
+            }
+            else
+            {
+                returnBuffer[0] = (int)GameResult::None;
+            }
+
+            returnBuffer[1] = playRequest;
+            returnBuffer[2] = false; // lowkey despise implicit casting
+        }
+        else
+        {
+            returnBuffer[0] = (int)GameResult::None;
+            returnBuffer[1] = (int)Plays::InvalidPlay;
+            returnBuffer[2] = true; // lowkey hate implicit casting
+        }
+
+        
+        // send back to the player
+        Send(
+            reinterpret_cast<char*>(returnBuffer),
+            SerializationHeaders::PlayResult, sizeof(int) * 3,
+            (PacketSendTarget)clientNumber
+        );
+
+        // send to the other player
+        returnBuffer[2] = ~returnBuffer[2]; // basically !isOtherPlayerTurn
+        Send(
+            reinterpret_cast<char*>(returnBuffer),
+            SerializationHeaders::PlayResult, sizeof(int) * 3,
+            (PacketSendTarget)(int)!(bool)clientNumber // nasty but makes me tremendously happy // (IK it could ve been (PacketSendTarget)!clientNumber )
+        ); 
     }
 
-    bool PlayIsValid(int play)
+    bool TryPlay(int play, int clientNumber)
     {
-        return false;
-    }
+        if (clientNumber != GameServer::Instance->PlayerTurn) { return false; }
+
+        if (!Grid::IsSlotEmpty(play)) { return false; }
+        
+        GameServer::Instance->PlayerTurn = (int)!(bool)GameServer::Instance->PlayerTurn;
+        Grid::Place(play, (bool)clientNumber);
+
+        return true;
+        }
 };
