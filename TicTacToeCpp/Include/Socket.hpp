@@ -40,16 +40,6 @@ protected:
     }
 public:
     virtual void Run() = 0;
-    void Send(const char* data, SerializationHeaders what)
-    {
-        Send(data, what, (int)strlen(data));
-    }
-    void Send(const char* data, SerializationHeaders what, int size)
-    {
-        _ = send(socket_, reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
-
-        _ = send(socket_, data, size, 0);
-    }
 
 protected:
     SOCKET socket_;
