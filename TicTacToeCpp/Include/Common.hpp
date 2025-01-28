@@ -45,24 +45,31 @@ private:
 
 enum class PacketSendTarget
 {
+	Client0,
+	Client1,
 	Broadcast,
-	NotSelf
 };
 
 enum class SerializationHeaders
 {
-	Login,
+	ConnectionEvent,
 	Play,
+	PlayResult,
 	ChatMessage,
 };
 
-enum class Plays
+enum class Plays // name is dogshit but couldn t figure out a decent one so if u got one feel free ^^
 {
+	// one through eight are simply the slots
 	InvalidPlay = 9,
-	ValidPlay = 10,
-	PlayerOneWon = 11,
-	Draw = 12,
-	PlayerTwoWon = 13,
+};
+
+enum class GameResult
+{
+	None,
+	PlayerOneWon,
+	PlayerTwoWon,
+	Draw,
 };
 
 struct PacketHeader
