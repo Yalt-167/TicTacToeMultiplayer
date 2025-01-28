@@ -136,8 +136,10 @@ void SocketController::speak(SOCKET clientSocket) {
 
 
 
-void SocketController::closeAll(SOCKET clientSocket, SOCKET serverSocket) {
-    closesocket(clientSocket);
-    closesocket(serverSocket);
+void SocketController::closeAllSockets() {
+    for (auto& sock : sockets) {
+        closesocket(sock);
+    }
+    sockets.clear();
     WSACleanup();
 }

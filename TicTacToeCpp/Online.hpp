@@ -44,7 +44,7 @@ public:
 	void speak(SOCKET clientSocket);
 
 	//ferme les sockets et WinSock2
-	void closeAll(SOCKET clientSocket, SOCKET serverSocket);
+	void closeAllSockets();
 
 };
 

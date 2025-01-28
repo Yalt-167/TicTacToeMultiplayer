@@ -54,9 +54,6 @@ int main(int argc, char** argv)
 			std::cout << username << " : ";
 			std::getline(std::cin, msg);
 			socketcontroller.Send(clientSocket, msg, username);
-			std::thread t(&SocketController::receive, &socketcontroller, serverSocket);
-
-			t.join();
 		}
 	}
 
