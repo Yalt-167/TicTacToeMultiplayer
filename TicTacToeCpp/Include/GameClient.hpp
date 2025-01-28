@@ -12,7 +12,9 @@ public:
 	{
 		userName = userName_;
 		window = new Window(600, 600, "Tic");
+		grid = new Grid(false);
 		clientSocket = new ClientSocket(userName_);
+
 		
 	}
 	~GameClient()
@@ -35,23 +37,26 @@ public:
 	void Render()
 	{
 		window->RenderWindow->clear(sf::Color::Black);
-		grid.Render(window->RenderWindow);
+		grid->Render(window->RenderWindow);
 		window->RenderWindow->display();
 	}
 	void Play()
 	{
-		int play = GatherInput(&grid, window->RenderWindow);
-		std::cout << "Play: " << play << std::endl;
-		if (!canPlay && play != INVALID_PLAY)
+		int play = GatherInput(grid, window->RenderWindow);
+		if (play != INVALID_PLAY)
 		{
-			clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play);
+			std::cout << "Play: " << play << std::endl;
+			if (CanPlay)
+			{
+				clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play, sizeof(int));
+			}
 		}
 	}
 
-	int GatherInput(Grid* grid, sf::RenderWindow* renderWindow)
+	int GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
 	{
-		int validatedInput = -1;
-		int rawInput = -1;
+		int validatedInput = INVALID_PLAY;
+		int rawInput = INVALID_PLAY;
 
 		sf::Event event;
 		sf::Vector2i mousePos;
@@ -85,12 +90,12 @@ public:
 		return validatedInput;
 	}
 
+	bool CanPlay = false;
 private:
 	ClientSocket* clientSocket;
 	std::string userName;
 
 	Window* window = nullptr;
-	Grid grid;
-	bool canPlay = false;
+	Grid* grid;
 	const int INVALID_PLAY = -1;
 };
