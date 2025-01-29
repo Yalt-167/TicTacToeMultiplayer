@@ -2,9 +2,14 @@
 #include "Window.hpp"
 #include "SpritesData.hpp"
 
+Grid* Grid::instance = nullptr;
 
-Grid::Grid()
+Grid::Grid(bool isServerSide_)
 {
+	instance = this;
+	
+	if (isServerSide = isServerSide_) { return; }
+
 	gridTexture = sf::Texture();
 	gridTexture.loadFromFile("Assets/Images/Grid.png");
 	gridSprite = sf::Sprite(gridTexture);
@@ -23,25 +28,19 @@ Grid::Grid()
 
 void Grid::Place(int slot, bool isO)
 {
-	grid[slot / 3][slot % 3] = isO ? 'O' : 'X';
+	instance->grid[slot / 3][slot % 3] = isO ? 'O' : 'X';
 }
 
-bool Grid::IsSlotEmpty(int slot) const
+bool Grid::IsSlotEmpty(int slot)
 {
-	return grid[slot / 3][slot % 3] == ' ';
+	return instance->grid[slot / 3][slot % 3] == ' ';
 }
 
-//STATIC
-bool Grid::IsSlotEmpty(const std::vector<std::vector<char>>& grid, int slot)
-{
-	return grid[slot / 3][slot % 3] == ' ';
-}
-
-void Grid::RenderToConsole() const
+void Grid::RenderToConsole()
 {
 	for (int row = 0; row < 3; row++)
 	{
-		std::cout << grid[row][0] << " | " << grid[row][1] << " | " << grid[row][2] << std::endl;
+		std::cout << instance->grid[row][0] << " | " << instance->grid[row][1] << " | " << instance->grid[row][2] << std::endl;
 
 		if (row == 2) { break; }
 
@@ -53,15 +52,15 @@ void Grid::RenderToConsole() const
 
 void Grid::Render(sf::RenderWindow* renderWindow)
 {
-	renderWindow->draw(gridSprite);
+	renderWindow->draw(instance->gridSprite);
 	sf::Sprite currentSprite;
 	for (int row = 0; row < 3; row++)
 	{
 		for (int column = 0; column < 3; column++)
 		{
-			if (grid[row][column] == ' ') { continue; }
+			if (instance->grid[row][column] == ' ') { continue; }
 
-			currentSprite = grid[row][column] == 'X' ? crossSprite : circleSprite;
+			currentSprite = instance->grid[row][column] == 'X' ? instance->crossSprite : instance->circleSprite;
 			currentSprite.setPosition(
 				(float)(SpritesData::Padding + column * (SpritesData::SymbolSpritesSize + 2 * SpritesData::Padding)),
 				(float)(SpritesData::Padding + row * (SpritesData::SymbolSpritesSize + 2 * SpritesData::Padding))
@@ -71,37 +70,28 @@ void Grid::Render(sf::RenderWindow* renderWindow)
 	}
 }
 
-std::vector<std::vector<char>> Grid::GetRaw() const
-{
-	return grid;
-}
 
-bool Grid::VerifyWin() const
-{
-	return Grid::CheckRawGrid(GetRaw());
-}
-
-bool Grid::CheckRawGrid(const std::vector<std::vector<char>>& grid)
+bool Grid::CheckWin()
 {
 	for (int i = 0; i < 3; i++)
 	{
-		if (' ' != grid[i][0] && grid[i][0] == grid[i][1] && grid[i][1] == grid[i][2])
+		if (' ' != instance->grid[i][0] && instance->grid[i][0] == instance->grid[i][1] && instance->grid[i][1] == instance->grid[i][2])
 		{
 			return true;
 		}
 
-		if (' ' != grid[0][i] && grid[0][i] == grid[1][i] && grid[1][i] == grid[2][i])
+		if (' ' != instance->grid[0][i] && instance->grid[0][i] == instance->grid[1][i] && instance->grid[1][i] == instance->grid[2][i])
 		{
 			return true;
 		}
 	}
 
-	if (' ' != grid[0][0] && grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2])
+	if (' ' != instance->grid[0][0] && instance->grid[0][0] == instance->grid[1][1] && instance->grid[1][1] == instance->grid[2][2])
 	{
 		return true;
 	}
 
-	if (' ' != grid[0][2] && grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0])
+	if (' ' != instance->grid[0][2] && instance->grid[0][2] == instance->grid[1][1] && instance->grid[1][1] == instance->grid[2][0])
 	{
 		return true;
 	}
@@ -109,43 +99,14 @@ bool Grid::CheckRawGrid(const std::vector<std::vector<char>>& grid)
 	return false;
 }
 
-bool Grid::CheckWetherGridFull(const std::vector<std::vector<char>>& grid)
+bool Grid::CheckDraw()
 {
 	for (int i = 0; i < 9; i++)
 	{
-		if (grid[i / 3][i % 3] == ' ') { return false; }
+		if (instance->grid[i / 3][i % 3] == ' ') { return false; }
 	}
 
 	return true;
-}
-
-// STATIC but this dogshit language doesn t let me mark it properly from here
-int Grid::EvaluateGrid(const std::vector<std::vector<char>>& grid_, char symbolThatShouldWin)
-{
-	for (int i = 0; i < 3; i++)
-	{
-		if (' ' != grid_[i][0] && grid_[i][0] == grid_[i][1] && grid_[i][1] == grid_[i][2])
-		{
-			return grid_[i][0] == symbolThatShouldWin ? 1 : -1;
-		}
-
-		if (' ' != grid_[0][i] && grid_[0][i] == grid_[1][i] && grid_[1][i] == grid_[2][i])
-		{
-			return grid_[0][i] == symbolThatShouldWin ? 1 : -1;
-		}
-	}
-
-	if (' ' != grid_[0][0] && grid_[0][0] == grid_[1][1] && grid_[1][1] == grid_[2][2])
-	{
-		return grid_[0][0] == symbolThatShouldWin ? 1 : -1;
-	}
-
-	if (' ' != grid_[0][2] && grid_[0][2] == grid_[1][1] && grid_[1][1] == grid_[2][0])
-	{
-		return grid_[0][2] == symbolThatShouldWin ? 1 : -1;
-	}
-
-	return 0;
 }
 
 void Grid::Clear()
@@ -154,7 +115,7 @@ void Grid::Clear()
 	{
 		for (int column = 0; column < 3; column++)
 		{
-			grid[row][column] = ' ';
+			instance->grid[row][column] = ' ';
 		}
 	}
 }

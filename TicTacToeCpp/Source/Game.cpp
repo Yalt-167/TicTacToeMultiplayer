@@ -10,13 +10,15 @@ Game::Game(bool isServer_)
 	{
 		return;
 	}
-
+	grid = new Grid(true);
 	window = new Window(600, 600, "Tic");
 }
 
 
 Game::~Game()
 {
+	delete grid;
+
 	delete window;
 }
 
@@ -37,13 +39,13 @@ void Game::Run()
 
 void Game::Play()
 {
-	grid.Place(players[(int)currentPlayerIsO].GatherInput(grid, window->RenderWindow), currentPlayerIsO);
+	grid->Place(players[(int)currentPlayerIsO].GatherInput(*grid, window->RenderWindow), currentPlayerIsO);
 	turns++;
 }
 
 void Game::VerifyWin()
 {
-	if (grid.VerifyWin())
+	if (grid->CheckWin())
 	{
 		std::cout << (currentPlayerIsO ? 'O' : 'X') << " has won" << std::endl;
 		Reset();
@@ -61,7 +63,7 @@ void Game::VerifyWin()
 void Game::Render()
 {
 	window->RenderWindow->clear(sf::Color::Black);
-	grid.Render(window->RenderWindow);
+	grid->Render(window->RenderWindow);
 	window->Rename(currentPlayerIsO ? "Tic" : "Tac");
 	window->RenderWindow->display();
 }
@@ -70,7 +72,7 @@ void Game::Reset()
 {
 	turns = 0;
 
-	grid.Clear();
+	grid->Clear();
 
 	Render();
 

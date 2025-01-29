@@ -167,10 +167,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="Assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Source\ClientSocket.cpp" />
     <ClCompile Include="Source\Game.cpp" />
+    <ClCompile Include="Source\GameClient.cpp" />
+    <ClCompile Include="Source\GameServer.cpp" />
     <ClCompile Include="Source\Grid.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\ServerSocket.cpp" />
     <ClCompile Include="Source\SpritesData.cpp" />
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
@@ -186,11 +195,6 @@
     <ClInclude Include="Include\Socket.hpp" />
     <ClInclude Include="Include\SpritesData.hpp" />
     <ClInclude Include="Include\Window.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

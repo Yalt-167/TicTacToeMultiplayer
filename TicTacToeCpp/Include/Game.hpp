@@ -19,7 +19,7 @@ public:
 private:
 	bool isServer;
 	Window* window = nullptr;
-	Grid grid;
+	Grid* grid;
 	int turns = 0;
 	bool currentPlayerIsO = false;
 	bool doClearConsole = true;

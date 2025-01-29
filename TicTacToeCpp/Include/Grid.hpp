@@ -4,31 +4,14 @@
 class Grid
 {
 public:
-	Grid();
-	void Place(int slot, bool isO);
-	bool IsSlotEmpty(int slot) const;
-	static bool IsSlotEmpty(const std::vector<std::vector<char>>& grid, int slot);
-	bool VerifyWin() const;
-	static bool CheckRawGrid(const std::vector<std::vector<char>>& grid);
-	static bool CheckWetherGridFull(const std::vector<std::vector<char>>& grid);
-	static int EvaluateGrid(const std::vector<std::vector<char>>& grid, char symbolThatShouldWin);
-	void Clear();
-	void RenderToConsole() const;
-	void Render(sf::RenderWindow* renderWindow);
-	static void RenderStatic(const std::vector<std::vector<char>>& grid_)
-	{
-		for (int row = 0; row < 3; row++)
-		{
-			std::cout << grid_[row][0] << " | " << grid_[row][1] << " | " << grid_[row][2] << std::endl;
-
-			if (row == 2) { break; }
-
-			std::cout << "--+---+--" << std::endl;
-		}
-
-		std::cout << std::endl;
-	}
-	std::vector<std::vector<char>> GetRaw() const;
+	Grid(bool isServerSide_);
+	static void Place(int slot, bool isO);
+	static bool IsSlotEmpty(int slot);
+	static bool CheckWin();
+	static bool CheckDraw();
+	static void Clear();
+	static void RenderToConsole();
+	static void Render(sf::RenderWindow* renderWindow);
 private:
 	std::vector<std::vector<char>> grid = {
 		{' ', ' ', ' ' },
@@ -42,4 +25,7 @@ private:
 	sf::Texture crossTexture;
 	sf::Sprite circleSprite;
 	sf::Texture circleTexture;
+
+	static Grid* instance;
+	bool isServerSide = false;
 };

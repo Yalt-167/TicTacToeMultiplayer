@@ -43,13 +43,9 @@ public:
 	void Play()
 	{
 		int play = GatherInput(grid, window->RenderWindow);
-		if (play != INVALID_PLAY)
+		if (play != INVALID_PLAY && CanPlay)
 		{
-			std::cout << "Play: " << play << std::endl;
-			if (CanPlay)
-			{
-				clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play, sizeof(int));
-			}
+			clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play, sizeof(int));
 		}
 	}
 
@@ -90,7 +86,7 @@ public:
 		return validatedInput;
 	}
 
-	bool CanPlay = false;
+	static bool CanPlay;
 private:
 	ClientSocket* clientSocket;
 	std::string userName;
