@@ -127,7 +127,6 @@ void SocketController::speak(SOCKET clientSocket) {
         for (const SOCKET& sock : sockets) {
             if (sock != clientSocket) {
                 send(sock, msg, strlen(msg), 0);
-                std::cout << "test" << std::endl;
             }
         }
     }
