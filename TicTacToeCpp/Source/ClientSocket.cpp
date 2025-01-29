@@ -109,23 +109,17 @@ void ClientSocket::Listen()
                 HandleChatMessage(header_[1]);
                 break;
 
-
-            case SerializationHeaders::Play:
-                std::cerr << "\rShouln t have received SerializationHeaders::Play" << std::endl;
-                throw std::exception("^^");
-                break;
-
             case SerializationHeaders::PlayResult:
                 HandlePlay();
                 break;
 
+            case SerializationHeaders::Play:
             default:
                 std::cerr << "\rInvalid SerializationHeader" << header_[0] << std::endl;
+                throw std::exception("^^");
                 break;
             }
         }
-
-        std::cout << userName << ": ";
     }
 }
 
@@ -145,37 +139,7 @@ void ClientSocket::HandlePlay()
 
     _ = recv(socket_, play, sizeof(int) * 4, 0);
 
-    int* plays = reinterpret_cast<int*>(&play);
-
-    switch ((GameResult)plays[0])
-    {
-    case GameResult::PlayerOneWon:
-        std::cout << "\r" << "Player 1 won" << std::endl;
-        break;
-
-    case GameResult::Draw:
-        std::cout << "\r" << "Draw" << std::endl;
-        break;
-
-    case GameResult::PlayerTwoWon:
-        std::cout << "\r" << "Player 2 won" << std::endl;
-        break;
-
-    case GameResult::None:
-    default:
-        break;
-    }
-
-    if ((Plays)plays[1] == Plays::InvalidPlay)
-    {
-        std::cout << "InvalidPlay" << std::endl;
-    }
-    else
-    {
-        Grid::Place(plays[1], plays[3]);
-    }
-    std::cout << "Here: " << plays[3] << std::endl;
-    GameClient::CanPlay = (bool)plays[2];
-
-    std::cout << userName << ": ";
+    int* playResult = reinterpret_cast<int*>(&play);
+    GameClient::HandlePlayResult(playResult[0], playResult[1], (bool)playResult[2], playResult[3]);
+    // I don t like this side but it s more legible within the method this way
 }

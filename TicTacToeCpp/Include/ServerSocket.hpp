@@ -12,7 +12,7 @@ public:
 
     int GetConnectedClientsCount() const;
 
-    void Send(const char* data, SerializationHeaders what, int size, PacketSendTarget target);
+    void Send(const char* data, SerializationHeaders what, int size, enum class PacketSendTarget target);
 private:
     void Init();
 
@@ -26,6 +26,4 @@ private:
     void HandleChatMessage(SOCKET& clientSocket, const char* name, int clientNumber, int messageSize);
 
     void HandlePlay(SOCKET& clientSocket, int clientNumber);
-
-    bool TryPlay(int play, int clientNumber);
 };

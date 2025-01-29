@@ -1,5 +1,3 @@
-#include "Grid.hpp"
-
 #include "GameServer.hpp"
 #include "GameClient.hpp"
 
@@ -17,6 +15,6 @@ int main(int argc, char** argv)
 		std::cin >> username;
 	}
 
-	Game_* game = (isServer ? (Game_*)new GameServer() : (Game_*)new GameClient(username));
+	Game* game = (isServer ? (Game*)new GameServer() : (Game*)new GameClient(username));
 	game->Run();
 }

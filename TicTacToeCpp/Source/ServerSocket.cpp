@@ -118,24 +118,31 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, int clien
         }
 
         int* header_ = reinterpret_cast<int*>(headerBuffer);
-        std::cerr << "SerializationHeader" << header_[0] << " | Size: " << header_[1] << std::endl;
-        switch ((SerializationHeaders)header_[0])
+        SerializationHeaders serializationHeader = (SerializationHeaders)header_[0];
+        std::cout
+            << "Got" <<
+            //LegibleSerializationHeaders(
+                (int)
+            serializationHeader
+            //) 
+            << " packet from "
+            << name 
+            << "Size: " << header_[1]
+            << std::endl;
+        switch (serializationHeader)
         {
         case SerializationHeaders::ConnectionEvent:
-            std::cout << "Got ConnectionEvent packet from " << clientNumber << std::endl;
+            // handle this at some point
             break;
 
         case SerializationHeaders::ChatMessage:
-            std::cout << "Got Chat packet from " << clientNumber << std::endl;
             HandleChatMessage(clientSocket, name, clientNumber, header_[1]);
             break;
 
         case SerializationHeaders::Play:
-            std::cout << "Got Play packet from " << clientNumber << std::endl;
             HandlePlay(clientSocket, clientNumber);
             break;
         }
-
     }
 
     delete[] name;
@@ -189,39 +196,7 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, int clientNumber)
 
     int returnBuffer[4]; // wether the game state has changed + the play itself + wether u can play + who played
 
-    int playRequest = *reinterpret_cast<int*>(playBuffer);
-
-    returnBuffer[3] = (int)!(bool)GameServer::Instance->PlayerTurn; // lowkey despise implicit casting
-    bool validPlay = TryPlay(playRequest, clientNumber);
-
-
-    if (validPlay)
-    {
-        if (Grid::CheckWin())
-        {
-            returnBuffer[0] = ((int)GameResult::PlayerOneWon + clientNumber);
-            // bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
-            // im dogshit at explaining things but I swear it makes sense
-        }
-        else if (Grid::CheckDraw())
-        {
-            returnBuffer[0] = (int)GameResult::Draw;
-        }
-        else
-        {
-            returnBuffer[0] = (int)GameResult::None;
-        }
-
-        returnBuffer[1] = playRequest;
-        returnBuffer[2] = false; // lowkey despise implicit casting
-    }
-    else
-    {
-        returnBuffer[0] = (int)GameResult::None;
-        returnBuffer[1] = (int)Plays::InvalidPlay;
-        returnBuffer[2] = true; // lowkey hate implicit casting
-    }
-
+    GameServer::ParsePlay(*reinterpret_cast<int*>(playBuffer), returnBuffer, clientNumber);
 
     // send back to the player
     Send(
@@ -239,14 +214,3 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, int clientNumber)
     );
 }
 
-bool ServerSocket::TryPlay(int play, int clientNumber)
-{
-    if (clientNumber != GameServer::Instance->PlayerTurn) { return false; }
-
-    if (!Grid::IsSlotEmpty(play)) { return false; }
-
-    GameServer::Instance->PlayerTurn = (int)!(bool)GameServer::Instance->PlayerTurn;
-    Grid::Place(play, (bool)clientNumber);
-
-    return true;
-}

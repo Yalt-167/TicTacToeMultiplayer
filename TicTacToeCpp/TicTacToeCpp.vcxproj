@@ -174,12 +174,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\ClientSocket.cpp" />
-    <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\GameClient.cpp" />
     <ClCompile Include="Source\GameServer.cpp" />
     <ClCompile Include="Source\Grid.cpp" />
-    <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\ServerSocket.cpp" />
+    <ClCompile Include="Source\Socket.cpp" />
     <ClCompile Include="Source\SpritesData.cpp" />
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
@@ -188,9 +187,13 @@
     <ClInclude Include="Include\Common.hpp" />
     <ClInclude Include="Include\Game.hpp" />
     <ClInclude Include="Include\GameClient.hpp" />
+    <ClInclude Include="Include\GameResult.hpp" />
     <ClInclude Include="Include\GameServer.hpp" />
     <ClInclude Include="Include\Grid.hpp" />
-    <ClInclude Include="Include\Player.hpp" />
+    <ClInclude Include="Include\PacketHeader.hpp" />
+    <ClInclude Include="Include\PacketSendTarget.hpp" />
+    <ClInclude Include="Include\Plays.hpp" />
+    <ClInclude Include="Include\SerializationHeaders.hpp" />
     <ClInclude Include="Include\ServerSocket.hpp" />
     <ClInclude Include="Include\Socket.hpp" />
     <ClInclude Include="Include\SpritesData.hpp" />

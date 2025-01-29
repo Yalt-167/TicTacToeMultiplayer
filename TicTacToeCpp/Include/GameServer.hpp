@@ -1,53 +1,25 @@
 #pragma once
 
+#include "Game.hpp"
 #include "Grid.hpp"
 #include "ServerSocket.hpp"
+#include "PacketSendTarget.hpp"
 
 
-class GameServer : public Game_
+class GameServer : public Game
 {
 public:
-	GameServer()
-	{
-		Instance = this;
-		gameGrid = new Grid(true);
-	}
-	~GameServer()
-	{
-		connectionThread->join();
-		delete connectionThread;
-	}
+	GameServer();
+	~GameServer();
 
-	void Run() override
-	{
-		connectionThread = new std::thread(
-			[&]() {
-				serverSocket.Run();
-			}
-		);
+	void Run() override;
 
-		while (serverSocket.GetConnectedClientsCount() < 2); // await players
+	static void ParsePlay(int play, int returnBuffer[4], int clientNumber);
+	bool CheckPlay(int play, int clientNumber);
 
-		int startupPacket[sizeof(int) * 4]
-		{
-			(int)GameResult::None,
-			(int)Plays::InvalidPlay,
-			true,
-			true,
-		};
-
-		serverSocket.Send(
-			reinterpret_cast<char*>(startupPacket),
-			SerializationHeaders::PlayResult, sizeof(int) * 4,
-			PacketSendTarget::Client0
-		);
-
-		while (serverSocket.GetConnectedClientsCount() == 2); // await !players
-	}
-
-	int PlayerTurn = 0;
-	static GameServer* Instance;
 private:
+	static GameServer* instance;
+	int playerTurn = 0;
 	Grid* gameGrid;
 	ServerSocket serverSocket;
 	std::thread* connectionThread = nullptr;
