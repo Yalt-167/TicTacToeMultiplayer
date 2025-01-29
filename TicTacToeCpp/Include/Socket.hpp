@@ -5,51 +5,16 @@ class Socket
 {
 public:
     ~Socket() { }
-    Socket()
-    {
-        InitWSA();
+    Socket();
 
-        socket_ = socket(AF_INET, SOCK_STREAM, 0);
-        if (socket_ == INVALID_SOCKET)
-        {
-            std::cerr << "Couldn create Socket" << std::endl;
-            WSACleanup();
-            throw std::exception("Couldn create Socket");
-        }
-
-        serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(PORT);
-    }
 protected:
-    void InitWSA()
-    {
-        WORD version = MAKEWORD(2, 2); // request the 2.2 version of Winsock 
+    void InitWSA();
+    void Cleanup() const;
 
-        if (WSAStartup(version, &wsaData) != 0)
-        {
-            std::cerr << "Couldn start WSA" << std::endl;
-            throw std::exception("Couldn start WSA");
-        }
-    }
-
-    void Cleanup() const
-    {
-        closesocket(socket_);
-
-        WSACleanup();
-    }
 public:
     virtual void Run() = 0;
-    void Send(const char* data, SerializationHeaders what)
-    {
-        Send(data, what, (int)strlen(data));
-    }
-    void Send(const char* data, SerializationHeaders what, int size)
-    {
-        _ = send(socket_, reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
-
-        _ = send(socket_, data, size, 0);
-    }
+    void Send(const char* data, SerializationHeaders what);
+    void Send(const char* data, SerializationHeaders what, int size);
 
 protected:
     SOCKET socket_;

@@ -8,82 +8,15 @@
 class GameClient : public Game_
 {
 public:
-	GameClient(const std::string& userName_)
-	{
-		userName = userName_;
-		window = new Window(600, 600, "Tic");
-		clientSocket = new ClientSocket(userName_);
-		
-	}
-	~GameClient()
-	{
-		delete window;
+	GameClient(const std::string& userName_);
+	~GameClient();
 
-		delete clientSocket;
-	}
-	void Run() override
-	{
-		clientSocket->Run();
-
-		while (true)
-		{
-			Play();
-			Render();
-		}
-	}
-
-	void Render()
-	{
-		window->RenderWindow->clear(sf::Color::Black);
-		grid.Render(window->RenderWindow);
-		window->RenderWindow->display();
-	}
-	void Play()
-	{
-		int play = GatherInput(&grid, window->RenderWindow);
-		std::cout << "Play: " << play << std::endl;
-		if (!canPlay && play != INVALID_PLAY)
-		{
-			clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play);
-		}
-	}
-
-	int GatherInput(Grid* grid, sf::RenderWindow* renderWindow)
-	{
-		int validatedInput = -1;
-		int rawInput = -1;
-
-		sf::Event event;
-		sf::Vector2i mousePos;
-		int row;
-		int column;
-		while (renderWindow->pollEvent(event))
-		{
-			switch (event.type)
-			{
-			case sf::Event::Closed:
-				renderWindow->close();
-				return 0;
-
-			case sf::Event::MouseButtonPressed:
-				if (event.key.code != sf::Mouse::Button::Left) { break; }
-
-				mousePos = sf::Mouse::getPosition(*renderWindow);
-
-				column = mousePos.x / SpritesData::CellSize;
-				row = mousePos.y / SpritesData::CellSize;
-
-				rawInput = 3 * row + column;
-
-				if (grid->IsSlotEmpty(rawInput))
-				{
-					validatedInput = rawInput;
-				}
-			}
-		}
-
-		return validatedInput;
-	}
+	void Run() override;
+	void Render();
+	void Play();
+	int GatherInput(Grid* grid, sf::RenderWindow* renderWindow);
+	void AllowPlay();
+	void PlaceOnGrid(int slot, bool isO);
 
 private:
 	ClientSocket* clientSocket;

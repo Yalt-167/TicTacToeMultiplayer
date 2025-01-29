@@ -17,36 +17,39 @@ public:
     {
         while (true)
         {
-            sockaddr_in clientAddr;
-            int clientSize = sizeof(clientAddr);
-            SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &clientSize);
+            if (connectedClients < 2) {
+                sockaddr_in clientAddr;
+                int clientSize = sizeof(clientAddr);
+                SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &clientSize);
 
-            if (clientSocket == INVALID_SOCKET)
-            {
-                std::cerr << "Failed to accept client" << std::endl;
-                continue;
-            }
-
-            if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
-            {
-                std::cerr << "Gone too soon" << std::endl;
-                continue;
-            }
-
-            int nameSize = reinterpret_cast<int*>(headerBuffer)[1] + 1; // include null terminator
-            char* nameBuffer = new char[nameSize];
-          
-            _ = recv(clientSocket, nameBuffer, nameSize, 0);
-
-            clientSockets[connectedClients] = clientSocket;
-            clientThreads[connectedClients] = std::thread(
-                [=]()
+                if (clientSocket == INVALID_SOCKET)
                 {
-                    HandleClient(clientSocket, nameBuffer, connectedClients++);
+                    std::cerr << "Failed to accept client" << std::endl;
+                    continue;
                 }
-            );
 
-            std::cout << nameBuffer << " connected" << std::endl;
+                if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
+                {
+                    std::cerr << "Gone too soon" << std::endl;
+                    continue;
+                }
+
+                int nameSize = reinterpret_cast<int*>(headerBuffer)[1] + 1; // include null terminator
+                char* nameBuffer = new char[nameSize];
+          
+                _ = recv(clientSocket, nameBuffer, nameSize, 0);
+                _ = send(clientSocket, reinterpret_cast<char*>(&(connectedClients)), sizeof(int), 0);
+
+                clientSockets[connectedClients] = clientSocket;
+                clientThreads[connectedClients] = std::thread(
+                    [=]()
+                    {
+                        HandleClient(clientSocket, nameBuffer, connectedClients++);
+                    }
+                );
+
+                std::cout << nameBuffer << " connected" << std::endl;
+            }
         }
 
         for (int i = 0; i < clientThreads.size(); i++)
@@ -178,7 +181,15 @@ private:
 
         int playValidity = (int)(PlayIsValid(*reinterpret_cast<int*>(playBuffer)) ? Plays::InvalidPlay : Plays::ValidPlay);
 
-        Send(reinterpret_cast<char*>(&playValidity), SerializationHeaders::Play);
+        int otherClientIndex = (int)(!(bool)clientNumber);
+        _ = send(
+            clientSockets[otherClientIndex],
+            reinterpret_cast<char*>(&header.Set(SerializationHeaders::Play, sizeof(int))),
+            sizeof(PacketHeader),
+            0
+        );
+
+        _ = send(clientSockets[otherClientIndex], reinterpret_cast<char*>(&playValidity), sizeof(int), 0);
     }
 
     bool PlayIsValid(int play)
