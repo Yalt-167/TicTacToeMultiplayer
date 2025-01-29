@@ -40,7 +40,7 @@ void GameClient::Play()
 	//std::cout << "Play: " << play << std::endl;
 	if (canPlay && play != INVALID_PLAY)
 	{
-		grid.Place(play, false);
+		grid.Place(play, clientSocket->ClientIndex());
 		clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play);
 		canPlay = false;
 	}

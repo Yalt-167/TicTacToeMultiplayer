@@ -171,8 +171,10 @@
     <ClCompile Include="Source\ClientSocket.cpp" />
     <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\GameClient.cpp" />
+    <ClCompile Include="Source\GameServer.cpp" />
     <ClCompile Include="Source\Grid.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\ServerSocket.cpp" />
     <ClCompile Include="Source\Socket.cpp" />
     <ClCompile Include="Source\SpritesData.cpp" />
     <ClCompile Include="Source\Window.cpp" />

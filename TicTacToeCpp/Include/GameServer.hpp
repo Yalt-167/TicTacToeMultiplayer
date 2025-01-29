@@ -7,20 +7,10 @@
 class GameServer : public Game_
 {
 public:
-	GameServer()
-	{
+	GameServer() = default;
 
-	}
+	void Run() override;
 
-	void Run() override
-	{
-		serverSocket.Run();
-
-		while (serverSocket.GetConnectedClientsCount() < 2); // await players
-
-		//serverSocket.Broadcast(SerializationHeaders::Start.c_str());
-
-	}
 private:
 	Grid gameGrid;
 	ServerSocket serverSocket;
