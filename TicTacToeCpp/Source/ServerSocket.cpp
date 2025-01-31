@@ -12,12 +12,14 @@ ServerSocket::~ServerSocket() { }
 
 void ServerSocket::Run()
 {
+    sockaddr_in clientAddr;
+    int clientSize = sizeof(clientAddr);
     while (true)
     {
-        sockaddr_in clientAddr;
-        int clientSize = sizeof(clientAddr);
-        SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &clientSize);
+        if (connectedClients == 2) { continue; }
 
+        SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &clientSize);
+        
         if (clientSocket == INVALID_SOCKET)
         {
             std::cerr << "Failed to accept client" << std::endl;
@@ -29,29 +31,27 @@ void ServerSocket::Run()
             std::cerr << "Gone too soon" << std::endl;
             continue;
         }
-
+        
         int nameSize = reinterpret_cast<int*>(headerBuffer)[1] + 1; // include null terminator
         char* nameBuffer = new char[nameSize];
 
         _ = recv(clientSocket, nameBuffer, nameSize, 0);
+        
+        int clientIndex = freeClientIDs[0];
+        freeClientIDs.erase(freeClientIDs.begin());
 
-        clientSockets[connectedClients] = clientSocket;
-        clientThreads[connectedClients] = std::thread(
+        connectedClients++;
+
+        clientSockets[clientIndex] = clientSocket;
+        clientThreads[clientIndex] = std::thread(
             [=]()
             {
-                HandleClient(clientSocket, nameBuffer, connectedClients++);
+                HandleClient(clientSocket, nameBuffer, clientIndex);
             }
         );
+        clientThreads[clientIndex].detach();
 
         std::cout << nameBuffer << " connected" << std::endl;
-    }
-
-    for (int i = 0; i < clientThreads.size(); i++)
-    {
-        if (clientThreads[i].joinable())
-        {
-            clientThreads[i].join();
-        }
     }
 
     Cleanup();
@@ -62,7 +62,7 @@ int ServerSocket::GetConnectedClientsCount() const
     return connectedClients;
 }
 
-void ServerSocket::Send(const char* data, SerializationHeaders what, int size, PacketSendTarget target)
+void ServerSocket::Send(const char* data, SerializationHeaders what, const int size, PacketSendTarget target)
 {
     if (target == PacketSendTarget::Broadcast)
     {
@@ -103,36 +103,34 @@ void ServerSocket::Init()
     std::cout << "Server should be listening on port " << PORT << "..." << std::endl;
 }
 
-void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, int clientNumber)
+void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int clientNumber)
 {
     char headerBuffer[sizeof(PacketHeader)];
-
-    while (true)
+    bool socketOpen = true;
+    while (socketOpen)
     {
         if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
         {
             std::cout << name << " disconnected" << std::endl;
-            connectedClients--;
-
             break;
         }
 
         int* header_ = reinterpret_cast<int*>(headerBuffer);
         SerializationHeaders serializationHeader = (SerializationHeaders)header_[0];
         std::cout
-            << "Got" <<
+            << "Got " <<
             //LegibleSerializationHeaders(
                 (int)
             serializationHeader
             //) 
             << " packet from "
             << name 
-            << "Size: " << header_[1]
+            << " || Size: " << header_[1]
             << std::endl;
         switch (serializationHeader)
         {
         case SerializationHeaders::ConnectionEvent:
-            // handle this at some point
+            socketOpen = HandleConnectionEvent(clientSocket, name, clientNumber);
             break;
 
         case SerializationHeaders::ChatMessage:
@@ -144,13 +142,19 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, int clien
             break;
         }
     }
-
+    
     delete[] name;
+    
+    clientThreads.erase(clientThreads.begin() + clientNumber);
+    clientSockets.erase(clientSockets.begin() + clientNumber);
 
     _ = closesocket(clientSocket);
+
+    freeClientIDs.push_back(clientNumber);
+    connectedClients--;
 }
 
-void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const char* name, int clientNumber, int messageSize)
+void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const char* name, const int clientNumber, const int messageSize)
 {
     int nameLength = (int)strlen(name);
     int totalSize = nameLength + messageSize + 3; // + 3 -> account for ": " + null terminator
@@ -188,13 +192,13 @@ void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const char* name, int
     //delete[] message // fails for some reason
 }
 
-void ServerSocket::HandlePlay(SOCKET& clientSocket, int clientNumber)
+void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
 {
     char playBuffer[sizeof(int)];
 
     _ = recv(clientSocket, playBuffer, sizeof(int), 0);
 
-    int returnBuffer[4]; // wether the game state has changed + the play itself + wether u can play + who played
+    int returnBuffer[4]; // { <wether the game state has changed>, <the play itself>, <wether u can play>, <who played> }
 
     GameServer::ParsePlay(*reinterpret_cast<int*>(playBuffer), returnBuffer, clientNumber);
 
@@ -210,7 +214,30 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, int clientNumber)
     Send(
         reinterpret_cast<char*>(returnBuffer),
         SerializationHeaders::PlayResult, sizeof(int) * 4,
-        (PacketSendTarget)(int)!(bool)clientNumber // nasty but makes me tremendously happy // (IK it could ve been (PacketSendTarget)!clientNumber )
+        // (PacketSendTarget)(int)!(bool)clientNumber // nasty but makes me tremendously happy // (IK it could ve been (PacketSendTarget)!clientNumber )
+        clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
     );
+}
+
+bool ServerSocket::HandleConnectionEvent(SOCKET& clientSocket, const std::string& name, const int clientNumber)
+{
+    char eventDataBuffer[sizeof(int)];
+
+    _ = recv(clientSocket, eventDataBuffer, sizeof(int), 0);
+
+    if (*reinterpret_cast<int*>(eventDataBuffer) < 0)
+    {
+        std::string logoutLog = "[Server]: " + name + " disconnected";
+        Send(
+            logoutLog.c_str(),
+            SerializationHeaders::ChatMessage, logoutLog.size() + 1,
+            clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
+        );
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 

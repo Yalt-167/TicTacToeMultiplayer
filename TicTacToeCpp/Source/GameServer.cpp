@@ -2,6 +2,8 @@
 #include "Plays.hpp"
 #include "GameResult.hpp"
 
+#include <cstdint>
+
 GameServer* GameServer::instance = nullptr;
 
 GameServer::GameServer()
@@ -23,28 +25,35 @@ void GameServer::Run()
 		}
 	);
 
-	while (serverSocket.GetConnectedClientsCount() < 2); // await players
+	while (serverSocket.GetConnectedClientsCount() < 1); // await one player
 
-	int startupPacket[sizeof(int) * 4]
+	while (serverSocket.GetConnectedClientsCount() > 0) // while at least one player is connected keep the server alive
 	{
-		(int)GameResult::None,
-		(int)Plays::InvalidPlay,
-		true,
-		true,
-	};
+		while (serverSocket.GetConnectedClientsCount() < 2); // await players
 
-	serverSocket.Send(
-		reinterpret_cast<char*>(startupPacket),
-		SerializationHeaders::PlayResult, sizeof(int) * 4,
-		PacketSendTarget::Client0
-	);
+		int startupPacket[sizeof(int) * 4]
+		{
+			(int)GameResult::None,
+			(int)Plays::InvalidPlay,
+			true,
+			true,
+		};
 
-	while (serverSocket.GetConnectedClientsCount() == 2); // await !players
+		serverSocket.Send(
+			reinterpret_cast<char*>(startupPacket),
+			SerializationHeaders::PlayResult, sizeof(int) * 4,
+			PacketSendTarget::Client0
+		);
+
+		while (serverSocket.GetConnectedClientsCount() == 2); // await !players
+	}
+	
 }
 
 void GameServer::ParsePlay(int play, int returnBuffer[4], int clientNumber)
 {
-	returnBuffer[3] = (int)!(bool)instance->playerTurn;
+	// returnBuffer[3] = (int)!(bool)instance->playerTurn; // my sorrow is immeasurable
+	returnBuffer[3] = instance->playerTurn == 0 ? 1 : 0;
 	bool validPlay = instance->CheckPlay(play, clientNumber);
 
 	if (validPlay)
@@ -81,8 +90,9 @@ bool GameServer::CheckPlay(int play, int clientNumber)
 
 	if (!Grid::IsSlotEmpty(play)) { return false; }
 
-	playerTurn = (int)!(bool)playerTurn;
+	//playerTurn = (int)!(bool)playerTurn; // was pretty :(
+	playerTurn = playerTurn == 0 ? 1 : 0;
 	Grid::Place(play, (bool)clientNumber);
-
+	
 	return true;
 }
