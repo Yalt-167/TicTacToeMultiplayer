@@ -20,7 +20,7 @@ public:
 private:
 	static GameServer* instance;
 	int playerTurn = 0;
-	Grid* gameGrid;
+	Grid* gameGrid = nullptr;
 	ServerSocket serverSocket;
 	std::thread* connectionThread = nullptr;
 };

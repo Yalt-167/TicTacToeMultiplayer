@@ -2,10 +2,10 @@
 
 enum class SerializationHeaders
 {
-	ConnectionEvent,
-	Play,
-	PlayResult,
-	ChatMessage,
+	ConnectionEvent, // packet associated => <int: connection disconnection (1 -1)>
+	Play, // packet associated => 
+	PlayResult, // packet associated => { <wether the game state has changed>, <the play itself>, <wether u can play>, <who played> }
+	ChatMessage, // packet associated => just text
 };
 
 //std::string LegibleSerializationHeaders(SerializationHeaders sH)

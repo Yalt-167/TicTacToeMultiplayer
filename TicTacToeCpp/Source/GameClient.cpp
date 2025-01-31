@@ -28,7 +28,7 @@ void GameClient::Run()
 {
 	clientSocket->Run();
 
-	while (true)
+	while (shouldRun)
 	{
 		Play();
 		Render();
@@ -37,7 +37,21 @@ void GameClient::Run()
 
 void GameClient::Play()
 {
-	int play = GatherInput(grid, window->RenderWindow);
+	int play = GatherInput();
+
+	if (play == QUIT)
+	{
+		int data = -1;
+		clientSocket->Send(
+			reinterpret_cast<char*>(&data),
+			SerializationHeaders::ConnectionEvent,
+			sizeof(int)
+		);
+
+		shouldRun = false;
+		return;
+	}
+
 	if (play != INVALID_PLAY && canPlay)
 	{
 		clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play, sizeof(int));
@@ -51,7 +65,7 @@ void GameClient::Render()
 	window->RenderWindow->display();
 }
 
-int GameClient::GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
+int GameClient::GatherInput() const
 {
 	int validatedInput = INVALID_PLAY;
 	int rawInput = INVALID_PLAY;
@@ -60,18 +74,18 @@ int GameClient::GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
 	sf::Vector2i mousePos;
 	int row;
 	int column;
-	while (renderWindow->pollEvent(event))
+	while (window->RenderWindow->pollEvent(event))
 	{
 		switch (event.type)
 		{
 		case sf::Event::Closed:
-			renderWindow->close();
-			return 0;
+			window->RenderWindow->close();
+			return QUIT;
 
 		case sf::Event::MouseButtonPressed:
 			if (event.key.code != sf::Mouse::Button::Left) { break; }
 
-			mousePos = sf::Mouse::getPosition(*renderWindow);
+			mousePos = sf::Mouse::getPosition(*window->RenderWindow);
 
 			column = mousePos.x / SpritesData::CellSize;
 			row = mousePos.y / SpritesData::CellSize;
@@ -115,5 +129,4 @@ void GameClient::HandlePlayResult(const int gameResult, const int play, const bo
 	}
 
 	instance->canPlay = canPlay;
-
 }

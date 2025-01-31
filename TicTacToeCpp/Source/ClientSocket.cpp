@@ -53,7 +53,7 @@ void ClientSocket::Init()
 
     _ = send(socket_, userName.c_str(), nameSize, 0);
 
-    std::cout << "Should be connected to the server ^^" << std::endl;
+    std::cout << "Should be connected to the server ^^" << std::endl;   
 }
 
 void ClientSocket::Run()
@@ -123,7 +123,7 @@ void ClientSocket::Listen()
     }
 }
 
-void ClientSocket::HandleChatMessage(int bufferSize)
+void ClientSocket::HandleChatMessage(const int bufferSize)
 {
     char* chatBuffer = new char[bufferSize];
 
@@ -131,6 +131,8 @@ void ClientSocket::HandleChatMessage(int bufferSize)
 
     std::cout << "\r" << chatBuffer << std::endl;
     std::cout << userName << ": ";
+
+    delete[] chatBuffer;
 }
 
 void ClientSocket::HandlePlay()
@@ -139,7 +141,7 @@ void ClientSocket::HandlePlay()
 
     _ = recv(socket_, play, sizeof(int) * 4, 0);
 
-    int* playResult = reinterpret_cast<int*>(&play);
+    int* playResult = reinterpret_cast<int*>(play);
     GameClient::HandlePlayResult(playResult[0], playResult[1], (bool)playResult[2], playResult[3]);
     // I don t like this side but it s more legible within the method this way
 }

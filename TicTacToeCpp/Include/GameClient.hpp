@@ -16,14 +16,16 @@ private:
 	void Play();
 	void Render();
 
-	int GatherInput(class Grid* grid, sf::RenderWindow* renderWindow) const;
+	int GatherInput() const;
 
 	static GameClient* instance;
 	class ClientSocket* clientSocket;
 	std::string userName;
-	bool canPlay;
+	bool canPlay = false;
+	bool shouldRun = true;
 
 	class Window* window = nullptr;
 	class Grid* grid;
 	const int INVALID_PLAY = -1;
+	const int QUIT = -2;
 };
