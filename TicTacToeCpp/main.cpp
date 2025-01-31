@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 
 
 #include "SFML/Graphics.hpp"
@@ -25,36 +24,24 @@ int main(int argc, char** argv)
 	bool isServer = strcmp(typeServer.c_str(), "server") == 0;
 
 
-	SOCKET serverSocket = socketcontroller.createSocket();
-	SOCKET clientSocket = socketcontroller.createSocket();
+	SOCKET serverSocket = socketcontroller.createSocket(8080);	
 
 	std::string username;
 	if (isServer)
 	{
-
-		socketcontroller.Bind(serverSocket, 8080);
+		socketcontroller.Bind(serverSocket);
 		socketcontroller.Listen(serverSocket);
 		std::cout << "server set" << std::endl;
+		socketcontroller.echoAll(serverSocket);
 
-		while (true)
-		{
-			socketcontroller.Accept(clientSocket, serverSocket);
-			
-		}
 	}
 	else if (!isServer)
 	{
-
+		SOCKET clientSocket = socketcontroller.createSocket(8080);
 		std::cout << "Enter your username: " << std::endl;
 		std::cin >> username;
-
 		if (!socketcontroller.Connect(clientSocket, 8080)) { std::cerr << "Failed to connect" << std::endl; }
-		while (true){
-			std::string msg;
-			std::cout << username << " : ";
-			std::getline(std::cin, msg);
-			socketcontroller.Send(clientSocket, msg, username);
-		}
+		socketcontroller.speak(serverSocket, username);
 	}
 
     //Game(isServer).Run();
