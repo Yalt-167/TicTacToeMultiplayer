@@ -2,9 +2,10 @@
 #include "GameClient.hpp"
 
 
-ClientSocket::ClientSocket(const std::string& userName_) : Socket()
+ClientSocket::ClientSocket(const std::string& userName_, std::vector<std::string>* chatMessages_) : Socket()
 {
     userName = userName_;
+    chatMessages = chatMessages_;
 
     Init();
 }
@@ -129,8 +130,10 @@ void ClientSocket::HandleChatMessage(int bufferSize)
 
     _ = recv(socket_, chatBuffer, bufferSize, 0);
 
-    std::cout << "\r" << chatBuffer << std::endl;
-    std::cout << userName << ": ";
+    chatMessages->push_back(chatBuffer);
+
+    /*std::cout << "\r" << chatBuffer << std::endl;
+    std::cout << userName << ": ";*/
 }
 
 void ClientSocket::HandlePlay()

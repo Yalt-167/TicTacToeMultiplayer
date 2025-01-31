@@ -23,23 +23,28 @@ void GameServer::Run()
 		}
 	);
 
-	while (serverSocket.GetConnectedClientsCount() < 2); // await players
+	while (serverSocket.GetConnectedClientsCount() < 1); // await one player
 
-	int startupPacket[sizeof(int) * 4]
+	while (serverSocket.GetConnectedClientsCount() > 0) // while at least one player is connected keep the server alive
 	{
-		(int)GameResult::None,
-		(int)Plays::InvalidPlay,
-		true,
-		true,
-	};
+		while (serverSocket.GetConnectedClientsCount() < 2); // await players
 
-	serverSocket.Send(
-		reinterpret_cast<char*>(startupPacket),
-		SerializationHeaders::PlayResult, sizeof(int) * 4,
-		PacketSendTarget::Client0
-	);
+		int startupPacket[sizeof(int) * 4]
+		{
+			(int)GameResult::None,
+			(int)Plays::InvalidPlay,
+			true,
+			true,
+		};
 
-	while (serverSocket.GetConnectedClientsCount() == 2); // await !players
+		serverSocket.Send(
+			reinterpret_cast<char*>(startupPacket),
+			SerializationHeaders::PlayResult, sizeof(int) * 4,
+			PacketSendTarget::Client0
+		);
+
+		while (serverSocket.GetConnectedClientsCount() == 2); // await !players
+	}
 }
 
 void GameServer::ParsePlay(int play, int returnBuffer[4], int clientNumber)

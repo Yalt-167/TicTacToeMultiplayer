@@ -13,24 +13,27 @@ GameClient::GameClient(const std::string& userName_)
 {
 	instance = this;
 	userName = userName_;
-	window = new Window(600, 600, "Tic");
+	window = new Window(900, 600, "Tic");
 	grid = new Grid(false);
-	clientSocket = new ClientSocket(userName_);
+	clientSocket = new ClientSocket(userName_, &chatMessages);
 }
 GameClient::~GameClient()
 {
 	delete window;
-
 	delete clientSocket;
+	ImGui::SFML::Shutdown();
 }
 
 void GameClient::Run()
 {
 	clientSocket->Run();
 
+	ImGUI::SFML::Init(*window->RenderWindow);
+
 	while (true)
 	{
 		Play();
+		Chat();
 		Render();
 	}
 }
@@ -48,7 +51,44 @@ void GameClient::Render()
 {
 	window->RenderWindow->clear(sf::Color::Black);
 	grid->Render(window->RenderWindow);
+
+	ImGui::SFML::Render(*window->RenderWindow);
+
 	window->RenderWindow->display();
+}
+
+void GameClient::Chat() {
+	ImGUI::SFML::Update(*window->RenderWindow, sf::Time());
+
+	ImGUI::Begin("Chat Window", nullptr, ImGuiWindowFlags_NoMove);
+	ImGUI::SetWindowPos(ImVec2(620, 10));
+
+	ImGui::BeginChild("ChatBox", ImVec2(250, 520), true);
+
+	// Display all the chat messages
+	for (const auto& message : chatMessages)
+	{
+		ImGui::TextWrapped("%s", message.c_str());
+	}
+
+	ImGui::EndChild();
+
+	// Input box to enter new chat message
+	static char inputText[256] = "";  // Store the input message
+	if (ImGui::InputText("##ChatInput", inputText, IM_ARRAYSIZE(inputText), ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		if (strlen(inputText) > 0)
+		{
+			std::string msg = "[" + userName + "]: " + std::string(inputText);
+			// Add the new message to the chat
+			chatMessages.push_back(msg);
+			clientSocket->Send(msg.c_str(), SerializationHeaders::ChatMessage, msg.length() + 1);
+		}
+		// Clear the input field after sending the message
+		inputText[0] = '\0';
+	}
+
+	ImGUI::End();
 }
 
 int GameClient::GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
@@ -62,6 +102,8 @@ int GameClient::GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
 	int column;
 	while (renderWindow->pollEvent(event))
 	{
+		ImGUI::SFML::ProcessEvent(event);
+
 		switch (event.type)
 		{
 		case sf::Event::Closed:
@@ -72,6 +114,7 @@ int GameClient::GatherInput(Grid* grid, sf::RenderWindow* renderWindow) const
 			if (event.key.code != sf::Mouse::Button::Left) { break; }
 
 			mousePos = sf::Mouse::getPosition(*renderWindow);
+			if (mousePos.x > 600) { break; }
 
 			column = mousePos.x / SpritesData::CellSize;
 			row = mousePos.y / SpritesData::CellSize;

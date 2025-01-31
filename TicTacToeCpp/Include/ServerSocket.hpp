@@ -23,7 +23,7 @@ private:
 
     void HandleClient(SOCKET clientSocket, const char* name, int clientNumber);
 
-    void HandleChatMessage(SOCKET& clientSocket, const char* name, int clientNumber, int messageSize);
+    void HandleChatMessage(SOCKET& clientSocket, int clientNumber, int messageSize);
 
     void HandlePlay(SOCKET& clientSocket, int clientNumber);
 };

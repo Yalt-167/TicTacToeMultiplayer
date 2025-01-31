@@ -15,6 +15,7 @@ private:
 
 	void Play();
 	void Render();
+	void Chat();
 
 	int GatherInput(class Grid* grid, sf::RenderWindow* renderWindow) const;
 
@@ -22,6 +23,7 @@ private:
 	class ClientSocket* clientSocket;
 	std::string userName;
 	bool canPlay;
+	std::vector<std::string> chatMessages;
 
 	class Window* window = nullptr;
 	class Grid* grid;
