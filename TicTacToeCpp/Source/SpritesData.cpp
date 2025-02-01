@@ -6,7 +6,7 @@ int SpritesData::CellSize = 0;
 int SpritesData::SymbolSpritesSize = 0;
 int SpritesData::Padding = 0;
 
-void SpritesData::Init(int gridSpriteSize, int symboldSpritesSize)
+void SpritesData::Init(const int gridSpriteSize, const int symboldSpritesSize)
 {
 	GridSpriteSize = gridSpriteSize; // 600
 	CellSize = GridSpriteSize / 3;

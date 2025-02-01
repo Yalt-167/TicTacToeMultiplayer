@@ -2,7 +2,7 @@
 #include "SpritesData.hpp"
 
 
-Window::Window(int windowWidth, int windowHeight, const std::string& windowName)
+Window::Window(const int windowWidth, const int windowHeight, const std::string& windowName)
 {
 	RenderWindow = new sf::RenderWindow(sf::VideoMode(windowWidth, windowHeight), windowName, sf::Style::Titlebar | sf::Style::Close);
 }

@@ -48,8 +48,8 @@ void ClientSocket::Init()
         throw std::exception("Couldn t connect to server");
     }
 
-    int nameSize = (int)userName.size() + 1; // include null terminator
-    _ = send(socket_, reinterpret_cast<char*>(&header.Set(SerializationHeaders::ConnectionEvent, nameSize)), sizeof(PacketHeader), 0);
+    int nameSize = static_cast<int>(userName.size()) + 1; // include null terminator
+    _ = send(socket_, header.Set(SerializationHeaders::Disconnection, nameSize), sizeof(PacketHeader), 0);
 
     _ = send(socket_, userName.c_str(), nameSize, 0);
 
@@ -63,9 +63,9 @@ void ClientSocket::Run()
     chatWriterThread = new std::thread(&ClientSocket::WriteToChat, this);
 }
 
-void ClientSocket::Send(const char* data, SerializationHeaders what, int size)
+void ClientSocket::Send(const char* data, const SerializationHeaders what, const  int size)
 {
-    _ = send(socket_, reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+    _ = send(socket_, header.Set(what, size), sizeof(PacketHeader), 0);
 
     _ = send(socket_, data, size, 0);
 }
@@ -77,16 +77,17 @@ void ClientSocket::WriteToChat()
     char userInput[CHAT_BUFFER_SIZE];
     userInput[CHAT_BUFFER_SIZE - 1] = '\0';
 
-    PacketHeader header{ (int)SerializationHeaders::ChatMessage, 0 };
+    PacketHeader header{
+        SerializationHeaders::ChatMessage,
+        0
+    };
 
     while (true)
     {
         std::cout << userName << ": ";
         std::cin.getline(userInput, CHAT_BUFFER_SIZE);
 
-        if (strcmp(userInput, ":q") == 0) { break; } // ^^ we be WIMing
-
-        int messageSize = (int)strlen(userInput) + 1;
+        int messageSize = static_cast<int>(strlen(userInput)) + 1;
 
         header.Size = messageSize;
         _ = send(socket_, reinterpret_cast<char*>(&header), sizeof(PacketHeader), 0);
@@ -97,25 +98,32 @@ void ClientSocket::WriteToChat()
 
 void ClientSocket::Listen()
 {
-    char header[sizeof(PacketHeader)];
+    char headerBuffer[sizeof(PacketHeader)];
     while (true)
     {
-        if (recv(socket_, header, sizeof(PacketHeader), 0) > 0) // only receive the header
+        if (recv(socket_, headerBuffer, sizeof(PacketHeader), 0) > 0) // only receive the header
         {
-            int* header_ = reinterpret_cast<int*>(header);
-            switch ((SerializationHeaders)header_[0])
+            PacketHeader header = *reinterpret_cast<PacketHeader*>(headerBuffer);
+            switch (header.SerializationHeader)
             {
             case SerializationHeaders::ChatMessage:
-                HandleChatMessage(header_[1]);
+                HandleChatMessage(header.Size);
                 break;
 
             case SerializationHeaders::PlayResult:
-                HandlePlay();
+                HandlePlayResult();
+                break;
+
+            case SerializationHeaders::CatchupPacket:
+                HandleCatchupPacket();
                 break;
 
             case SerializationHeaders::Play:
+            case SerializationHeaders::Disconnection:
             default:
-                std::cerr << "\rInvalid SerializationHeader" << header_[0] << std::endl;
+                std::cerr <<
+                    "\rInvalid SerializationHeader" << PacketHeader::LegibleSerializationHeaders(header.SerializationHeader)
+                    << std::endl;
                 throw std::exception("^^");
                 break;
             }
@@ -135,13 +143,22 @@ void ClientSocket::HandleChatMessage(const int bufferSize)
     delete[] chatBuffer;
 }
 
-void ClientSocket::HandlePlay()
+void ClientSocket::HandlePlayResult()
 {
     char play[sizeof(int) * 4];
 
     _ = recv(socket_, play, sizeof(int) * 4, 0);
 
     int* playResult = reinterpret_cast<int*>(play);
-    GameClient::HandlePlayResult(playResult[0], playResult[1], (bool)playResult[2], playResult[3]);
+    GameClient::HandlePlayResult(playResult[0], playResult[1], static_cast<bool>(playResult[2]), playResult[3]);
     // I don t like this side but it s more legible within the method this way
+}
+
+void ClientSocket::HandleCatchupPacket()
+{
+    char grid[sizeof(char) * 9];
+
+    _ = recv(socket_, grid, sizeof(char) * 9, 0);
+
+    Grid::Deserialize(grid);
 }

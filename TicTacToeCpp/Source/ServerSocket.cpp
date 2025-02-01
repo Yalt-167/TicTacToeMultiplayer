@@ -1,24 +1,26 @@
 #include "ServerSocket.hpp"
 #include "GameServer.hpp"
+#include "PacketSendTarget.hpp"
 
 
 ServerSocket::ServerSocket() : Socket()
 {
     Init();
-    clientThreads.resize(2);
-    clientSockets.resize(2);
 }
-ServerSocket::~ServerSocket() { }
+ServerSocket::~ServerSocket()
+{
+    Cleanup();
+}
 
 void ServerSocket::Run()
 {
     sockaddr_in clientAddr;
-    int clientSize = sizeof(clientAddr);
+    int addrLen = sizeof(clientAddr);
     while (true)
     {
-        if (connectedClients == 2) { continue; }
+        while (connectedClients == 2);
 
-        SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &clientSize);
+        SOCKET clientSocket = accept(socket_, (sockaddr*)&clientAddr, &addrLen);
         
         if (clientSocket == INVALID_SOCKET)
         {
@@ -53,8 +55,6 @@ void ServerSocket::Run()
 
         std::cout << nameBuffer << " connected" << std::endl;
     }
-
-    Cleanup();
 }
 
 int ServerSocket::GetConnectedClientsCount() const
@@ -62,22 +62,22 @@ int ServerSocket::GetConnectedClientsCount() const
     return connectedClients;
 }
 
-void ServerSocket::Send(const char* data, SerializationHeaders what, const int size, PacketSendTarget target)
+void ServerSocket::Send(const char* data, const SerializationHeaders what, const int size, const PacketSendTarget target)
 {
     if (target == PacketSendTarget::Broadcast)
     {
-        for (int i = 0; i < clientSockets.size(); i++)
+        for (auto& [__, socket] : clientSockets)
         {
-            _ = send(clientSockets[i], reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+            _ = send(socket, header.Set(what, size), sizeof(PacketHeader), 0);
 
-            _ = send(clientSockets[i], data, size, 0);
+            _ = send(socket, data, size, 0);
         }
     }
     else
     {
-        _ = send(clientSockets[(int)target], reinterpret_cast<char*>(&header.Set(what, size)), sizeof(PacketHeader), 0);
+        _ = send(clientSockets[static_cast<int>(target)], header.Set(what, size), sizeof(PacketHeader), 0);
 
-        _ = send(clientSockets[(int)target], data, size, 0);
+        _ = send(clientSockets[static_cast<int>(target)], data, size, 0);
     }
 }
 
@@ -111,30 +111,25 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
     {
         if (recv(clientSocket, headerBuffer, sizeof(PacketHeader), 0) <= 0)
         {
-            std::cout << name << " disconnected" << std::endl;
+            std::cout << "[" << name << "] disconnected" << std::endl;
             break;
         }
 
-        int* header_ = reinterpret_cast<int*>(headerBuffer);
-        SerializationHeaders serializationHeader = (SerializationHeaders)header_[0];
+        PacketHeader header = *reinterpret_cast<PacketHeader*>(headerBuffer);
         std::cout
-            << "Got " <<
-            //LegibleSerializationHeaders(
-                (int)
-            serializationHeader
-            //) 
-            << " packet from "
-            << name 
-            << " || Size: " << header_[1]
+            << "Got " << PacketHeader::LegibleSerializationHeaders(header.SerializationHeader)
+            << " packet from [" << name 
+            << "] || Size: " << header.Size
             << std::endl;
-        switch (serializationHeader)
+        switch (header.SerializationHeader)
         {
-        case SerializationHeaders::ConnectionEvent:
-            socketOpen = HandleConnectionEvent(clientSocket, name, clientNumber);
+        case SerializationHeaders::Disconnection:
+            HandleDisconnection(clientSocket, name, clientNumber);
+            socketOpen = false;
             break;
 
         case SerializationHeaders::ChatMessage:
-            HandleChatMessage(clientSocket, name, clientNumber, header_[1]);
+            HandleChatMessage(clientSocket, name, clientNumber, header.Size);
             break;
 
         case SerializationHeaders::Play:
@@ -145,8 +140,8 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
     
     delete[] name;
     
-    clientThreads.erase(clientThreads.begin() + clientNumber);
-    clientSockets.erase(clientSockets.begin() + clientNumber);
+    clientThreads.erase(clientNumber);
+    clientSockets.erase(clientNumber);
 
     _ = closesocket(clientSocket);
 
@@ -178,13 +173,9 @@ void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const char* name, con
     _ = strcpy_s(message + nameLength + 2, totalSize, chatBuffer);
     message[totalSize - 1] = '\0';
 
-    int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning
-    _ = send(
-        clientSockets[otherClientIndex],
-        reinterpret_cast<char*>(&header.Set(SerializationHeaders::ChatMessage, totalSize)),
-        sizeof(PacketHeader),
-        0
-    );
+    //int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning // i was forced into the "righteous" path
+    int otherClientIndex = clientNumber == 0 ? 1 : 0;
+    _ = send(clientSockets[otherClientIndex], header.Set(SerializationHeaders::ChatMessage, totalSize), sizeof(PacketHeader), 0);
 
     _ = send(clientSockets[otherClientIndex], message, totalSize, 0);
 
@@ -219,25 +210,13 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
     );
 }
 
-bool ServerSocket::HandleConnectionEvent(SOCKET& clientSocket, const std::string& name, const int clientNumber)
+void ServerSocket::HandleDisconnection(SOCKET& clientSocket, const std::string& name, const int clientNumber)
 {
-    char eventDataBuffer[sizeof(int)];
-
-    _ = recv(clientSocket, eventDataBuffer, sizeof(int), 0);
-
-    if (*reinterpret_cast<int*>(eventDataBuffer) < 0)
-    {
         std::string logoutLog = "[Server]: " + name + " disconnected";
         Send(
             logoutLog.c_str(),
-            SerializationHeaders::ChatMessage, logoutLog.size() + 1,
+            SerializationHeaders::ChatMessage, static_cast<int>(logoutLog.size()) + 1,
             clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
         );
-        return false;
-    }
-    else
-    {
-        return true;
-    }
 }
 

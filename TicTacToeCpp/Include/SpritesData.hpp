@@ -4,7 +4,7 @@
 struct SpritesData
 {
 public:
-	static void Init(int gridSpriteSize, int symboldSpritesSize);
+	static void Init(const int gridSpriteSize, const int symboldSpritesSize);
 	static int GridSpriteSize;
 	static int CellSize;
 	static int SymbolSpritesSize;

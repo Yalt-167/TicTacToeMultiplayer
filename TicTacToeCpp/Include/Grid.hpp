@@ -4,14 +4,16 @@
 class Grid
 {
 public:
-	Grid(bool isServerSide_);
-	static void Place(int slot, bool isO);
-	static bool IsSlotEmpty(int slot);
+	Grid(const bool isServerSide_);
+	static void Place(const int slot, const  bool isO);
+	static bool IsSlotEmpty(const int slot);
 	static bool CheckWin();
 	static bool CheckDraw();
 	static void Clear();
 	static void RenderToConsole();
 	static void Render(sf::RenderWindow* renderWindow);
+	static char* Serialize(char grid[9]);
+	static void Deserialize(char grid[9]);
 private:
 	std::vector<std::vector<char>> grid = {
 		{' ', ' ', ' ' },

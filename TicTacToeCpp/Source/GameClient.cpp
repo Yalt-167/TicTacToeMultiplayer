@@ -9,6 +9,9 @@
 
 GameClient* GameClient::instance = nullptr;
 
+const std::string GameClient::youCanPlay = "Your turn";
+const std::string GameClient::youCantPlay = "!Your turn";
+
 GameClient::GameClient(const std::string& userName_)
 {
 	instance = this;
@@ -37,14 +40,13 @@ void GameClient::Run()
 
 void GameClient::Play()
 {
-	int play = GatherInput();
+	const int play = GatherInput();
 
 	if (play == QUIT)
 	{
-		int data = -1;
 		clientSocket->Send(
-			reinterpret_cast<char*>(&data),
-			SerializationHeaders::ConnectionEvent,
+			reinterpret_cast<const char*>(&QUIT),
+			SerializationHeaders::Disconnection,
 			sizeof(int)
 		);
 
@@ -54,11 +56,11 @@ void GameClient::Play()
 
 	if (play != INVALID_PLAY && canPlay)
 	{
-		clientSocket->Send(reinterpret_cast<char*>(&play), SerializationHeaders::Play, sizeof(int));
+		clientSocket->Send(reinterpret_cast<const char*>(&play), SerializationHeaders::Play, sizeof(int));
 	}
 }
 
-void GameClient::Render()
+void GameClient::Render() const
 {
 	window->RenderWindow->clear(sf::Color::Black);
 	grid->Render(window->RenderWindow);
@@ -104,9 +106,9 @@ int GameClient::GatherInput() const
 
 void GameClient::HandlePlayResult(const int gameResult, const int play, const bool canPlay, const int symbol)
 {
-	switch ((GameResult)gameResult)
+	switch (static_cast<GameResult>(gameResult))
 	{
-	case GameResult::PlayerOneWon:
+	case GameResult::PlayerZeroWon:
 		std::cout << "\r" << "Player 1 won\n" << instance->userName << ": ";
 		break;
 
@@ -114,7 +116,7 @@ void GameClient::HandlePlayResult(const int gameResult, const int play, const bo
 		std::cout << "\r" << "Draw\n" << instance->userName << ": ";
 		break;
 
-	case GameResult::PlayerTwoWon:
+	case GameResult::PlayerOneWon:
 		std::cout << "\r" << "Player 2 won\n" << instance->userName << ": ";
 		break;
 
@@ -123,10 +125,12 @@ void GameClient::HandlePlayResult(const int gameResult, const int play, const bo
 		break;
 	}
 
-	if ((Plays)play != Plays::InvalidPlay)
+	if (static_cast<Plays>(play) != Plays::InvalidPlay)
 	{
 		Grid::Place(play, symbol);
 	}
 
 	instance->canPlay = canPlay;
+
+	instance->window->Rename(canPlay ? youCanPlay : youCantPlay);
 }

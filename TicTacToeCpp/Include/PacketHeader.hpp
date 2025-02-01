@@ -5,23 +5,40 @@
 struct PacketHeader
 {
 public:
-	int What;
+	SerializationHeaders SerializationHeader;
 	int Size;
 
-	PacketHeader& Set(int what, int size)
+	// returns self as char* (basically self but serialized)
+	char* Set(const SerializationHeaders serializationHeader, const  int size)
 	{
-		What = what;
+		SerializationHeader = serializationHeader;
 		Size = size;
 
-		return *this;
+		return reinterpret_cast<char*>(this);
 	}
-	PacketHeader& Set(SerializationHeaders what, int size)
-	{
-		What = (int)what;
-		Size = size;
 
-		return *this;
-	}
+    static std::string LegibleSerializationHeaders(SerializationHeaders sH)
+    {
+        switch (sH)
+        {
+        case SerializationHeaders::ConnectionEvent:
+            return "ConnectionEvent";
+
+        case SerializationHeaders::Play:
+            return "Play";
+
+        case SerializationHeaders::PlayResult:
+            return "PlayResult";
+
+        case SerializationHeaders::ChatMessage:
+            return "ChatMessage";
+
+        case SerializationHeaders::CatchupPacket:
+            return "CatchupPacket";
+        }
+
+        return "Somehow you made it here";
+    }
 private:
 };
 
@@ -30,7 +47,7 @@ private:
 // send packets two by two
 
 // header
-// <what><size> -> <int, int> // can easily infer size tho (except for chat msg)
+// <what><size> -> <SerializationHeaders, int> // can easily infer size tho (except for chat msg)
 
-// then
-// <body> of size header.<size>
+// then body
+// <body> -> <char[<header.Size>]>

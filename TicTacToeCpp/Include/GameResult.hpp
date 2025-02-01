@@ -3,7 +3,7 @@
 enum class GameResult
 {
 	None,
+	PlayerZeroWon,
 	PlayerOneWon,
-	PlayerTwoWon,
 	Draw,
 };

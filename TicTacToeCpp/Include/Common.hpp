@@ -20,6 +20,10 @@
 
 #pragma comment(lib, "ws2_32.lib") // just found out about this: this is great
 
+//#define As(type, value) static_cast<type>(value)
+//#define MAkeFuNc(body) <:=:>() <% body %>
+//#define BrainDamAge(body) MAkeFuNc(body)
+//#define InT(body) As(BrainDamAge, MAkeFuNc)(body)
 
 constexpr const int PORT = 54000;
 constexpr const int CHAT_BUFFER_SIZE = 1024;
@@ -32,4 +36,4 @@ public:
 private:
 };
 
-constexpr inline Discarder _;
+constexpr const inline Discarder _;

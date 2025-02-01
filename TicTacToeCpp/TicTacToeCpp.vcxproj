@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="Include\ClientSocket.hpp" />
     <ClInclude Include="Include\Common.hpp" />
+    <ClInclude Include="Include\ConnectionEvent.hpp" />
     <ClInclude Include="Include\Game.hpp" />
     <ClInclude Include="Include\GameClient.hpp" />
     <ClInclude Include="Include\GameResult.hpp" />

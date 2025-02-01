@@ -4,7 +4,7 @@
 
 Grid* Grid::instance = nullptr;
 
-Grid::Grid(bool isServerSide_)
+Grid::Grid(const bool isServerSide_)
 {
 	instance = this;
 	
@@ -26,12 +26,12 @@ Grid::Grid(bool isServerSide_)
 	SpritesData::Init(gridTexture.getSize().x, crossTexture.getSize().x);
 }
 
-void Grid::Place(int slot, bool isO)
+void Grid::Place(const int slot, const  bool isO)
 {
 	instance->grid[slot / 3][slot % 3] = isO ? 'O' : 'X';
 }
 
-bool Grid::IsSlotEmpty(int slot)
+bool Grid::IsSlotEmpty(const int slot)
 {
 	return instance->grid[slot / 3][slot % 3] == ' ';
 }
@@ -70,6 +70,23 @@ void Grid::Render(sf::RenderWindow* renderWindow)
 	}
 }
 
+char* Grid::Serialize(char grid[9])
+{
+	for (int i = 0; i < 9; i++)
+	{
+		grid[i] = instance->grid[i / 3][i % 3];
+	}
+	
+	return grid;
+}
+
+void Grid::Deserialize(char grid[9])
+{
+	for (int i = 0; i < 9; i++)
+	{
+		instance->grid[i / 3][i % 3] = grid[i];
+	}
+}
 
 bool Grid::CheckWin()
 {

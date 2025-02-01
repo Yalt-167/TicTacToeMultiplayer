@@ -14,13 +14,14 @@ private:
 public:
     void Run() override;
 
-    void Send(const char* data, enum class SerializationHeaders what, int size);
+    void Send(const char* data, const SerializationHeaders what, const  int size);
 private:
     void WriteToChat();
     void Listen();
 
-    void HandleChatMessage(int bufferSize);
-    void HandlePlay();
+    void HandleChatMessage(const int bufferSize);
+    void HandlePlayResult();
+    void HandleCatchupPacket();
 
     std::string userName;
     std::thread* listenerThread;

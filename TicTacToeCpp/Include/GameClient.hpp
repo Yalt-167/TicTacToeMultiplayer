@@ -14,7 +14,7 @@ private:
 	void Run() override;
 
 	void Play();
-	void Render();
+	void Render() const;
 
 	int GatherInput() const;
 
@@ -26,6 +26,9 @@ private:
 
 	class Window* window = nullptr;
 	class Grid* grid;
-	const int INVALID_PLAY = -1;
-	const int QUIT = -2;
+	const int INVALID_PLAY = -2;
+	const int QUIT = -1;
+
+	static const std::string youCanPlay;
+	static const std::string youCantPlay;
 };
