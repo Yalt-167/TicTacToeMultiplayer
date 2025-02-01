@@ -56,6 +56,7 @@ void GameServer::Run()
 
 		while (serverSocket.GetConnectedClientsCount() == 2); // await !players
 	}
+
 }
 
 void GameServer::ParsePlay(const int play, int returnBuffer[4], const int clientNumber)

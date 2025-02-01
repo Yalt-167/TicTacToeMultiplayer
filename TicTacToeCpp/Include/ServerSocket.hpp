@@ -17,7 +17,6 @@ public:
 private:
     void Init();
 
-
     std::unordered_map<int, std::thread> clientThreads;
     std::unordered_map<int, SOCKET> clientSockets;
     int connectedClients = 0;
@@ -25,7 +24,7 @@ private:
 
     void HandleClient(SOCKET clientSocket, const char* name, const int clientNumber);
 
-    void HandleChatMessage(SOCKET& clientSocket, const char* name, const int clientNumber, const int messageSize);
+    void HandleChatMessage(SOCKET& clientSocket, const int clientNumber, const int messageSize);
     void HandlePlay(SOCKET& clientSocket, const int clientNumber);
     void HandleDisconnection(SOCKET& clientSocket, const std::string& name, const int clientNumber);
 };

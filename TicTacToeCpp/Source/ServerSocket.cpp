@@ -129,7 +129,7 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
             break;
 
         case SerializationHeaders::ChatMessage:
-            HandleChatMessage(clientSocket, name, clientNumber, header.Size);
+            HandleChatMessage(clientSocket, clientNumber, header.Size);
             break;
 
         case SerializationHeaders::Play:
@@ -149,38 +149,29 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
     connectedClients--;
 }
 
-void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const char* name, const int clientNumber, const int messageSize)
+
+void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const int clientNumber, const int messageSize)
 {
-    int nameLength = (int)strlen(name);
-    int totalSize = nameLength + messageSize + 3; // + 3 -> account for ": " + null terminator
-    char* message = new char[totalSize];
     char* chatBuffer = new char[messageSize];
 
     _ = recv(clientSocket, chatBuffer, messageSize, 0);
 
-    std::cout << name << ": " << chatBuffer << std::endl;
+    std::cout << chatBuffer << std::endl;
 
     if (connectedClients < 2)
     {
         std::cout << "Message not sent because there is only one client connected" << std::endl;
-        delete[] message;
         delete[] chatBuffer;
         return; // why even bother you are lonely AF just give up
     }
 
-    _ = strcpy_s(message, totalSize, name);
-    _ = strcpy_s(message + nameLength, totalSize, ": ");
-    _ = strcpy_s(message + nameLength + 2, totalSize, chatBuffer);
-    message[totalSize - 1] = '\0';
-
     //int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning // i was forced into the "righteous" path
     int otherClientIndex = clientNumber == 0 ? 1 : 0;
-    _ = send(clientSockets[otherClientIndex], header.Set(SerializationHeaders::ChatMessage, totalSize), sizeof(PacketHeader), 0);
+    _ = send(clientSockets[otherClientIndex], header.Set(SerializationHeaders::ChatMessage, messageSize), sizeof(PacketHeader), 0);
 
-    _ = send(clientSockets[otherClientIndex], message, totalSize, 0);
+    _ = send(clientSockets[otherClientIndex], chatBuffer, messageSize, 0);
 
     delete[] chatBuffer;
-    //delete[] message // fails for some reason
 }
 
 void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)

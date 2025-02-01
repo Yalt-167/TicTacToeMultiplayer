@@ -16,13 +16,19 @@ private:
 	void Play();
 	void Render() const;
 
+	void Chat();
+
 	int GatherInput() const;
 
 	static GameClient* instance;
 	class ClientSocket* clientSocket;
 	std::string userName;
+
 	bool canPlay = false;
 	bool shouldRun = true;
+	
+	std::vector<std::string> chatMessages;
+
 
 	class Window* window = nullptr;
 	class Grid* grid;

@@ -4,6 +4,13 @@
 #include "SFML/window.hpp"
 #include "SFML/system.hpp"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+
+#include "imgui.h"
+#include "imgui-SFML.h"
+
+namespace ImGUI = ImGui;
+
 #include <iostream>
 #include <thread>
 #include <vector>
