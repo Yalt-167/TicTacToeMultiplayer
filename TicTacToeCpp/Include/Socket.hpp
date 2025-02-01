@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PacketHeader.hpp"
-#include "ConnectionEvent.hpp"
 
 
 class Socket

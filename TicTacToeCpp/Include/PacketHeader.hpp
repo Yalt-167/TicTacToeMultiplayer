@@ -21,7 +21,7 @@ public:
     {
         switch (sH)
         {
-        case SerializationHeaders::ConnectionEvent:
+        case SerializationHeaders::Disconnection:
             return "ConnectionEvent";
 
         case SerializationHeaders::Play:
