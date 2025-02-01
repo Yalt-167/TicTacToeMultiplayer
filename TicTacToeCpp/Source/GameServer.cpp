@@ -122,3 +122,21 @@ bool GameServer::CheckPlay(const int play, const int clientNumber)
 	
 	return true;
 }
+
+void GameServer::RestoreChatMessages(const int clientIndex)
+{
+	PacketSendTarget target = static_cast<PacketSendTarget>(clientIndex);
+	for (const auto& message : instance->chatLogs)
+	{
+		instance->serverSocket.Send(
+			message.c_str(),
+			SerializationHeaders::ChatMessage,
+			static_cast<int>(message.size()) + 1,
+			target
+		);
+	}
+}
+void GameServer::StoreChatMessage(const std::string& msg)
+{
+	instance->chatLogs.push_back(msg);
+}

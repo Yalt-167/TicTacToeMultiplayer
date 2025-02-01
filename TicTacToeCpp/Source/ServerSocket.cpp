@@ -105,6 +105,8 @@ void ServerSocket::Init()
 
 void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int clientNumber)
 {
+    GameServer::RestoreChatMessages(clientNumber);
+
     char headerBuffer[sizeof(PacketHeader)];
     bool socketOpen = true;
     while (socketOpen)
@@ -158,6 +160,8 @@ void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const int clientNumbe
 
     std::cout << chatBuffer << std::endl;
 
+    GameServer::StoreChatMessage(chatBuffer);
+
     if (connectedClients < 2)
     {
         std::cout << "Message not sent because there is only one client connected" << std::endl;
@@ -188,7 +192,7 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
     Send(
         reinterpret_cast<char*>(returnBuffer),
         SerializationHeaders::PlayResult, sizeof(int) * 4,
-        (PacketSendTarget)clientNumber
+        static_cast<PacketSendTarget>(clientNumber)
     );
 
     // send to the other player
@@ -196,18 +200,19 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
     Send(
         reinterpret_cast<char*>(returnBuffer),
         SerializationHeaders::PlayResult, sizeof(int) * 4,
-        // (PacketSendTarget)(int)!(bool)clientNumber // nasty but makes me tremendously happy // (IK it could ve been (PacketSendTarget)!clientNumber )
+        // (PacketSendTarget)(int)!(bool)clientNumber // nasty but would ve made me tremendously happy
         clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
     );
 }
 
 void ServerSocket::HandleDisconnection(SOCKET& clientSocket, const std::string& name, const int clientNumber)
 {
-        std::string logoutLog = "[Server]: " + name + " disconnected";
-        Send(
-            logoutLog.c_str(),
-            SerializationHeaders::ChatMessage, static_cast<int>(logoutLog.size()) + 1,
-            clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
-        );
+    std::string logoutLog = "[Server]: " + name + " disconnected";
+    Send(
+        logoutLog.c_str(),
+        SerializationHeaders::ChatMessage,
+        static_cast<int>(logoutLog.size()) + 1,
+        clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
+    );
 }
 
