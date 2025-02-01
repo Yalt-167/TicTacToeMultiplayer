@@ -33,9 +33,11 @@ void GameServer::Run()
 
 	while (serverSocket.GetConnectedClientsCount() < 1); // await one player
 
+	std::cout << "Awaiting one more player to start the game..." << std::endl;
+
 	while (serverSocket.GetConnectedClientsCount() > 0) // while at least one player is connected keep the server alive
 	{
-		while (serverSocket.GetConnectedClientsCount() < 2); // await players to start the game
+		if (serverSocket.GetConnectedClientsCount() < 2) { continue; } // await players to start the game
 
 		serverSocket.Send(
 			Grid::Serialize(gridState),
@@ -55,8 +57,11 @@ void GameServer::Run()
 		}
 
 		while (serverSocket.GetConnectedClientsCount() == 2); // await !players
+
+		std::cout << "Awaiting another player to continue the game" << std::endl;
 	}
 
+	std::cout << "No more player connected. Shutting down the server" << std::endl;
 }
 
 void GameServer::ParsePlay(const int play, int returnBuffer[4], const int clientNumber)
