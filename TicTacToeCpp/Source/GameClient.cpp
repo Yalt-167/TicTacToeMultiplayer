@@ -24,6 +24,7 @@ GameClient::~GameClient()
 {
 	delete window;
 	delete clientSocket;
+
 	ImGui::SFML::Shutdown();
 }
 
@@ -67,9 +68,7 @@ void GameClient::Render() const
 {
 	window->RenderWindow->clear(sf::Color::Black);
 	grid->Render(window->RenderWindow);
-
 	ImGui::SFML::Render(*window->RenderWindow);
-
 	window->RenderWindow->display();
 }
 

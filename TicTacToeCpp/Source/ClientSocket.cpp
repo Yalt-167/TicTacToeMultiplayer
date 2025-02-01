@@ -12,10 +12,10 @@ ClientSocket::ClientSocket(const std::string& userName_, std::vector<std::string
 ClientSocket::~ClientSocket()
 {
     listenerThread->join();
-    chatWriterThread->join();
+    //chatWriterThread->join();
 
     delete listenerThread;
-    delete chatWriterThread;
+    //delete chatWriterThread;
 
     Cleanup();
 }
@@ -61,7 +61,7 @@ void ClientSocket::Run()
 {
     listenerThread = new std::thread(&ClientSocket::Listen, this);
 
-    chatWriterThread = new std::thread(&ClientSocket::WriteToChat, this);
+    //chatWriterThread = new std::thread(&ClientSocket::WriteToChat, this);
 }
 
 void ClientSocket::Send(const char* data, const SerializationHeaders what, const  int size)
