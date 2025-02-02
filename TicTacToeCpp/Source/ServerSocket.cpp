@@ -42,6 +42,7 @@ void ServerSocket::Run()
         int clientIndex = freeClientIDs[0];
         freeClientIDs.erase(freeClientIDs.begin());
 
+        std::cout << nameBuffer << " connected" << std::endl;
         connectedClients++;
 
         clientSockets[clientIndex] = clientSocket;
@@ -52,8 +53,6 @@ void ServerSocket::Run()
             }
         );
         clientThreads[clientIndex].detach();
-
-        std::cout << nameBuffer << " connected" << std::endl;
     }
 }
 
@@ -107,6 +106,15 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
 {
     GameServer::RestoreChatMessages(clientNumber);
 
+    std::string loginLog = "[Server]: " + std::string(name) + " connected";
+    GameServer::StoreChatMessage(loginLog);
+    Send(
+        loginLog.c_str(),
+        SerializationHeaders::ChatMessage,
+        static_cast<int>(loginLog.size()) + 1,
+        PacketSendTarget::Broadcast
+    );
+
     char headerBuffer[sizeof(PacketHeader)];
     bool socketOpen = true;
     while (socketOpen)
@@ -118,11 +126,15 @@ void ServerSocket::HandleClient(SOCKET clientSocket, const char* name, const int
         }
 
         PacketHeader header = *reinterpret_cast<PacketHeader*>(headerBuffer);
-        std::cout
-            << "Got " << PacketHeader::LegibleSerializationHeaders(header.SerializationHeader)
-            << " packet from [" << name 
-            << "] || Size: " << header.Size
-            << std::endl;
+
+        if (GameServer::LogEveryPacket)
+        {
+            std::cout
+                << "Got " << PacketHeader::LegibleSerializationHeaders(header.SerializationHeader)
+                << " packet from [" << name
+                << "] || Size: " << header.Size
+                << std::endl;
+        }
         switch (header.SerializationHeader)
         {
         case SerializationHeaders::Disconnection:
@@ -193,7 +205,7 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
         reinterpret_cast<char*>(returnBuffer),
         SerializationHeaders::PlayResult, sizeof(int) * 3,
         static_cast<PacketSendTarget>(clientNumber)
-    );
+    ); 
 
     // send to the other player
     returnBuffer[1] = ~returnBuffer[1]; // basically !isOtherPlayerTurn
@@ -207,7 +219,10 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
 
 void ServerSocket::HandleDisconnection(SOCKET& clientSocket, const std::string& name, const int clientNumber)
 {
+    std::cout << name << " disconnected" << std::endl;
+
     std::string logoutLog = "[Server]: " + name + " disconnected";
+    GameServer::StoreChatMessage(logoutLog);
     Send(
         logoutLog.c_str(),
         SerializationHeaders::ChatMessage,

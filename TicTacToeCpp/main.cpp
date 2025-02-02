@@ -2,6 +2,7 @@
 #include "GameClient.hpp"
 
 #define DO_HIDE_CLIENT_CONSOLE
+#define LOG_EVERY_SINGLE_PACKET true
 
 int main(int argc, char** argv)
 {
@@ -17,7 +18,7 @@ int main(int argc, char** argv)
 	ShowWindow(GetConsoleWindow(), static_cast<int>(isServer));
 #endif
 
-	Game* game = (isServer ? (Game*)new GameServer() : (Game*)new GameClient());
+	Game* game = (isServer ? (Game*)new GameServer(LOG_EVERY_SINGLE_PACKET) : (Game*)new GameClient());
 
 	game->Run();
 

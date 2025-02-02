@@ -4,8 +4,9 @@
 #include "Grid.hpp"
 
 GameServer* GameServer::instance = nullptr;
+bool GameServer::LogEveryPacket = false;
 
-GameServer::GameServer()
+GameServer::GameServer(bool logEveryPacket_)
 {
 	instance = this;
 	gameGrid = new Grid(true);
@@ -14,6 +15,8 @@ GameServer::GameServer()
 	startupPacket[2] = static_cast<int>(false);
 
 	ZeroMemory(gridState, 9); // for the sake of intellisense happy
+
+	LogEveryPacket = logEveryPacket_;
 }
 GameServer::~GameServer()
 {

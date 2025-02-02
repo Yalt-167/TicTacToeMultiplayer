@@ -8,7 +8,7 @@
 class GameServer : public Game
 {
 public:
-	GameServer();
+	GameServer(bool logEveryPacket_);
 	~GameServer();
 
 	void Run() override;
@@ -20,6 +20,7 @@ public:
 	static void RestoreChatMessages(const int clientIndex);
 	static void StoreChatMessage(const std::string& msg);
 
+	static bool LogEveryPacket;
 private:
 	static GameServer* instance;
 	int playerTurn = 0;
