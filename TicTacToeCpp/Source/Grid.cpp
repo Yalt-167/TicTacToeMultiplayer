@@ -70,14 +70,14 @@ void Grid::Render(sf::RenderWindow* renderWindow)
 	}
 }
 
-char* Grid::Serialize(char grid[9])
+char* Grid::Serialize(char receiveGridBuffer[9])
 {
 	for (int i = 0; i < 9; i++)
 	{
-		grid[i] = instance->grid[i / 3][i % 3];
+		receiveGridBuffer[i] = instance->grid[i / 3][i % 3];
 	}
 	
-	return grid;
+	return receiveGridBuffer;
 }
 
 void Grid::Deserialize(char grid[9])
@@ -128,11 +128,8 @@ bool Grid::CheckDraw()
 
 void Grid::Clear()
 {
-	for (int row = 0; row < 3; row++)
+	for (int i = 0; i < 9; i++)
 	{
-		for (int column = 0; column < 3; column++)
-		{
-			instance->grid[row][column] = ' ';
-		}
+		instance->grid[i / 3][i % 3] = ' ';
 	}
 }

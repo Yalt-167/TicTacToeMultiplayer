@@ -1,6 +1,5 @@
 #include "GameServer.hpp"
 #include "Plays.hpp"
-#include "GameResult.hpp"
 #include "PacketSendTarget.hpp"
 #include "Grid.hpp"
 
@@ -15,7 +14,7 @@ GameServer::GameServer()
 	startupPacket[1] = static_cast<int>(Plays::InvalidPlay);
 	startupPacket[3] = static_cast<int>(true);
 
-	ZeroMemory(gridState, 9); // for the sake of intellisense happy
+	ZeroMemory(gridState, 9); // for the sake of compiler happy
 }
 GameServer::~GameServer()
 {
@@ -90,13 +89,28 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 	{
 		if (Grid::CheckWin())
 		{
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::PlayerZeroWon) + clientNumber;
+			instance->score[clientNumber]++;
+			GameServer::EndGame(static_cast<GameResult>(static_cast<int>(GameResult::PlayerZeroWon) + clientNumber), clientNumber);
+			returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // to avoid changing client side grids
+			returnBuffer[canPlay] = static_cast<int>(false);
+			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
+			return;
+			//returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::PlayerZeroWon) + clientNumber;
 			// bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
 			// im dogshit at explaining things but I swear it makes sense
 		}
+		else if (Grid::CheckDraw())
+		{
+			GameServer::EndGame(GameResult::Draw, clientNumber);
+			returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // to avoid changing client side grids
+			returnBuffer[canPlay] = static_cast<int>(false);
+			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
+			return;
+			//returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::Draw);
+		}
 		else
 		{
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(Grid::CheckDraw() ? GameResult::Draw : GameResult::None);
+			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
 		}
 
 		returnBuffer[playItself] = play;
@@ -108,6 +122,35 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 		returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // u ve somehow managed not to understand how TicTacToe works
 		returnBuffer[canPlay] = static_cast<int>(true); // lowkey hate implicit casting
 	}
+}
+
+void GameServer::EndGame(const GameResult gameResult, const int clientNumber)
+{
+	std::string msg;
+	if (gameResult == GameResult::Draw)
+	{
+		msg = std::format("[Server] It s a draw\nScore: {} - {}", instance->score[0], instance->score[1]);
+	}
+	else
+	{
+		msg = std::format("[Server] Player {} won!\nScore: {} - {} ", clientNumber + 1, instance->score[0], instance->score[1]);
+	}
+
+	instance->serverSocket.Send(
+		msg.c_str(),
+		SerializationHeaders::ChatMessage,
+		static_cast<int>(msg.size()) + 1,
+		PacketSendTarget::Broadcast
+	);
+
+	Grid::Clear();
+
+	instance->serverSocket.Send(
+		Grid::Serialize(instance->gridState),
+		SerializationHeaders::CatchupPacket,
+		sizeof(char) * 9,
+		PacketSendTarget::Broadcast
+	);
 }
 
 bool GameServer::CheckPlay(const int play, const int clientNumber)

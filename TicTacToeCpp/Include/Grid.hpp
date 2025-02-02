@@ -12,7 +12,7 @@ public:
 	static void Clear();
 	static void RenderToConsole();
 	static void Render(sf::RenderWindow* renderWindow);
-	static char* Serialize(char grid[9]);
+	static char* Serialize(char receiveGridBuffer[9]);
 	static void Deserialize(char grid[9]);
 private:
 	std::vector<std::vector<char>> grid = {

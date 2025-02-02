@@ -136,7 +136,7 @@ void GameClient::Chat() {
 			std::string msg = "[" + userName + "]: " + std::string(inputText);
 			// Add the new message to the chat
 			chatMessages.push_back(msg);
-			clientSocket->Send(msg.c_str(), SerializationHeaders::ChatMessage, msg.length() + 1);
+			clientSocket->Send(msg.c_str(), SerializationHeaders::ChatMessage, static_cast<int>(msg.length()) + 1);
 		}
 		// Clear the input field after sending the message
 		inputText[0] = '\0';
