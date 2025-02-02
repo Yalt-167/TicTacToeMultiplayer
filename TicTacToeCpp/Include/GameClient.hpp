@@ -13,7 +13,7 @@ public:
 private:
 	void Run() override;
 
-	void PickUsername();
+	bool PickUsername();
 
 	void Play();
 	void Render() const;

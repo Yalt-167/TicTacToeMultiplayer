@@ -22,7 +22,7 @@ public:
         switch (sH)
         {
         case SerializationHeaders::Disconnection:
-            return "ConnectionEvent";
+            return "Disconnection";
 
         case SerializationHeaders::Play:
             return "Play";
@@ -37,7 +37,7 @@ public:
             return "CatchupPacket";
         }
 
-        return "Somehow you made it here";
+        return "Somehow you made it here congrats";
     }
 private:
 };

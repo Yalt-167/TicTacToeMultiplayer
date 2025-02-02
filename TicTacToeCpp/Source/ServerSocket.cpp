@@ -169,8 +169,8 @@ void ServerSocket::HandleChatMessage(SOCKET& clientSocket, const int clientNumbe
         return; // why even bother you are lonely AF just give up
     }
 
-    //int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning // i was forced into the "righteous" path
-    int otherClientIndex = clientNumber == 0 ? 1 : 0;
+    //int otherClientIndex = (int)(!(bool)clientNumber); // lowkey sinning 
+    int otherClientIndex = clientNumber == 0 ? 1 : 0; // i was forced into the "righteous" path
     _ = send(clientSockets[otherClientIndex], header.Set(SerializationHeaders::ChatMessage, messageSize), sizeof(PacketHeader), 0);
 
     _ = send(clientSockets[otherClientIndex], chatBuffer, messageSize, 0);

@@ -37,7 +37,10 @@ void GameClient::Run()
 {
 	ImGUI::SFML::Init(*window->RenderWindow);
 
-	PickUsername();
+	if (PickUsername())
+	{
+		return;
+	}
 
 	clientSocket = new ClientSocket(userName, &chatMessages);
 	clientSocket->Run();
@@ -51,7 +54,7 @@ void GameClient::Run()
 	}
 }
 
-void GameClient::PickUsername()
+bool GameClient::PickUsername()
 {
 	char userName_[64] = "";
 
@@ -62,13 +65,19 @@ void GameClient::PickUsername()
 		
 		while (window->RenderWindow->pollEvent(event))
 		{
+			if (event.type == sf::Event::Closed)
+			{
+				window->RenderWindow->close();
+				return true;
+			}
+
 			ImGUI::SFML::ProcessEvent(event);
 		}
 
-		ImGui::SetNextWindowSize(ImVec2(300, 150));
-		ImGui::SetNextWindowPos(ImVec2(300, 200), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(300, 60));
+		ImGui::SetNextWindowPos(ImVec2(300, 270), ImGuiCond_Always);
 
-		ImGui::Begin("Username Picker", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		ImGui::Begin("Username Picker", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
 
 		// shamelessly permanently borrowed Hugo s code ^^
 		if (ImGui::InputText("##userNamePicker", userName_, IM_ARRAYSIZE(userName_), ImGuiInputTextFlags_EnterReturnsTrue))
@@ -85,7 +94,10 @@ void GameClient::PickUsername()
 		//grid->Render(window->RenderWindow);
 		ImGui::SFML::Render(*window->RenderWindow);
 		window->RenderWindow->display();
+
 	}
+
+	return false;
 }
 
 void GameClient::Play()

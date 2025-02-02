@@ -14,7 +14,7 @@ GameServer::GameServer()
 	startupPacket[1] = static_cast<int>(Plays::InvalidPlay);
 	startupPacket[3] = static_cast<int>(false);
 
-	ZeroMemory(gridState, 9); // for the sake of compiler happy
+	ZeroMemory(gridState, 9); // for the sake of intellisense happy
 }
 GameServer::~GameServer()
 {
