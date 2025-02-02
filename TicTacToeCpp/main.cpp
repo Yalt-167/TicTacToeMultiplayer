@@ -1,6 +1,8 @@
 #include "GameServer.hpp"
 #include "GameClient.hpp"
 
+#define DO_HIDE_CLIENT_CONSOLE
+
 int main(int argc, char** argv)
 {
 	if (argc < 2)
@@ -10,8 +12,10 @@ int main(int argc, char** argv)
 	}
 
 	const bool isServer = strcmp(argv[1], "Server") == 0;
-	
+
+#ifdef DO_HIDE_CLIENT_CONSOLE
 	ShowWindow(GetConsoleWindow(), static_cast<int>(isServer));
+#endif
 
 	Game* game = (isServer ? (Game*)new GameServer() : (Game*)new GameClient());
 

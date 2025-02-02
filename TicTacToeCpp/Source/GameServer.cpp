@@ -12,7 +12,7 @@ GameServer::GameServer()
 
 	startupPacket[0] = static_cast<int>(GameResult::None);
 	startupPacket[1] = static_cast<int>(Plays::InvalidPlay);
-	startupPacket[3] = static_cast<int>(true);
+	startupPacket[3] = static_cast<int>(false);
 
 	ZeroMemory(gridState, 9); // for the sake of compiler happy
 }
@@ -76,7 +76,7 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 	}
 	*/
 	// lets set those for clarity and avoid magic values:
-	static constexpr const int gameStateAfterPlay = 0;
+	static constexpr const int gameStateAfterPlay = 0; // could lowkey remove that now
 	static constexpr const int playItself = 1;
 	static constexpr const int canPlay = 2;
 	static constexpr const int whoPlayed = 3;
@@ -161,7 +161,7 @@ bool GameServer::CheckPlay(const int play, const int clientNumber)
 
 	//playerTurn = (int)!(bool)playerTurn; // was pretty :(
 	playerTurn = playerTurn == 0 ? 1 : 0;
-	Grid::Place(play, static_cast<bool>(clientNumber));
+	Grid::Place(play, !static_cast<bool>(clientNumber));
 	
 	return true;
 }

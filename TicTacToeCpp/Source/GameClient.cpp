@@ -6,6 +6,7 @@
 #include "Plays.hpp"
 #include "GameResult.hpp"
 
+//#define HIDE_CHAT
 
 GameClient* GameClient::instance = nullptr;
 
@@ -15,7 +16,13 @@ const std::string GameClient::youCantPlay = "!Your turn";
 GameClient::GameClient()
 {
 	instance = this;
-	window = new Window(900, 600, "Tic");
+	window = new Window(
+#ifdef HIDE_CHAT
+		600, 
+#else
+		900,
+#endif
+		600, "TicTacToe	");
 	grid = new Grid(false);
 }
 GameClient::~GameClient()
