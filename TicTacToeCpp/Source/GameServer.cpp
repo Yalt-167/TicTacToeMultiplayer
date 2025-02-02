@@ -78,8 +78,7 @@ void GameServer::ParsePlay(const int play, int returnBuffer[3], const int client
 	static constexpr const int getTheTurnAgain = 1;
 	static constexpr const int whoJustPlayed = 2;
 
-	// returnBuffer[3] = (int)!(bool)instance->playerTurn; // my sorrow is immeasurable
-	returnBuffer[whoJustPlayed] = instance->playerTurn == 0 ? 1 : 0;
+	returnBuffer[whoJustPlayed] = clientNumber;
 	bool validPlay = instance->CheckPlay(play, clientNumber);
 
 	if (validPlay)
@@ -148,9 +147,8 @@ bool GameServer::CheckPlay(const int play, const int clientNumber)
 
 	if (!Grid::IsSlotEmpty(play)) { return false; }
 
-	//playerTurn = (int)!(bool)playerTurn; // was pretty :(
 	playerTurn = playerTurn == 0 ? 1 : 0;
-	Grid::Place(play, !static_cast<bool>(clientNumber));
+	Grid::Place(play, static_cast<bool>(clientNumber));
 	
 	return true;
 }
