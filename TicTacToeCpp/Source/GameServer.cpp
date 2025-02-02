@@ -95,9 +95,9 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 			returnBuffer[canPlay] = static_cast<int>(false);
 			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
 			return;
-			//returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::PlayerZeroWon) + clientNumber;
 			// bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
 			// im dogshit at explaining things but I swear it makes sense
+			// don't worry I get it :D
 		}
 		else if (Grid::CheckDraw())
 		{
@@ -106,7 +106,6 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 			returnBuffer[canPlay] = static_cast<int>(false);
 			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
 			return;
-			//returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::Draw);
 		}
 		else
 		{
