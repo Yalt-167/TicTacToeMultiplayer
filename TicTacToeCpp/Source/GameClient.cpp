@@ -148,28 +148,31 @@ int GameClient::GatherInput() const
 
 void GameClient::HandlePlayResult(const int gameResult, const int play, const bool canPlay, const int symbol)
 {
+	if (static_cast<Plays>(play) != Plays::InvalidPlay)
+	{
+		Grid::Place(play, symbol);
+	}
+
 	switch (static_cast<GameResult>(gameResult))
 	{
 	case GameResult::PlayerZeroWon:
 		std::cout << "\r" << "Player 1 won\n" << instance->userName << ": ";
+		Grid::Clear();
 		break;
 
 	case GameResult::Draw:
 		std::cout << "\r" << "Draw\n" << instance->userName << ": ";
+		Grid::Clear();
 		break;
 
 	case GameResult::PlayerOneWon:
 		std::cout << "\r" << "Player 2 won\n" << instance->userName << ": ";
+		Grid::Clear();
 		break;
 
 	case GameResult::None:
 	default:
 		break;
-	}
-
-	if (static_cast<Plays>(play) != Plays::InvalidPlay)
-	{
-		Grid::Place(play, symbol);
 	}
 
 	instance->canPlay = canPlay;

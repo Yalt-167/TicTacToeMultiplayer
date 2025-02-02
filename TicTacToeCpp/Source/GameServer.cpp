@@ -39,6 +39,9 @@ void GameServer::Run()
 	{
 		if (serverSocket.GetConnectedClientsCount() < 2) { continue; } // await players to start the game
 
+		// Doesn't work !
+		// switch the players (it's kinda weird)
+		// but I don't wanna fix it right now :D
 		serverSocket.Send(
 			Grid::Serialize(gridState),
 			SerializationHeaders::CatchupPacket,
@@ -93,10 +96,13 @@ void GameServer::ParsePlay(const int play, int returnBuffer[4], const int client
 			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::PlayerZeroWon) + clientNumber;
 			// bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
 			// im dogshit at explaining things but I swear it makes sense
+			// don't worry I get it :D
+			Grid::Clear();
 		}
 		else
 		{
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(Grid::CheckDraw() ? GameResult::Draw : GameResult::None);
+			returnBuffer[gameStateAfterPlay] = static_cast<int>(Grid::CheckDraw() ? []() { Grid::Clear(); return GameResult::Draw; }() : GameResult::None);
+			// lambda is a bit nasty but didn't wanted to ruin the ternair :D
 		}
 
 		returnBuffer[playItself] = play;
