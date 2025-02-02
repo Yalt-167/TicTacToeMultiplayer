@@ -184,22 +184,22 @@ void ServerSocket::HandlePlay(SOCKET& clientSocket, const int clientNumber)
 
     _ = recv(clientSocket, playBuffer, sizeof(int), 0);
 
-    int returnBuffer[4]; // { <wether the game state has changed>, <the play itself>, <wether u can play>, <who played> }
+    int returnBuffer[3]; // { <the play itself>, <wether u can play>, <who played> }
 
     GameServer::ParsePlay(*reinterpret_cast<int*>(playBuffer), returnBuffer, clientNumber);
 
     // send back to the player
     Send(
         reinterpret_cast<char*>(returnBuffer),
-        SerializationHeaders::PlayResult, sizeof(int) * 4,
+        SerializationHeaders::PlayResult, sizeof(int) * 3,
         static_cast<PacketSendTarget>(clientNumber)
     );
 
     // send to the other player
-    returnBuffer[2] = ~returnBuffer[2]; // basically !isOtherPlayerTurn
+    returnBuffer[1] = ~returnBuffer[1]; // basically !isOtherPlayerTurn
     Send(
         reinterpret_cast<char*>(returnBuffer),
-        SerializationHeaders::PlayResult, sizeof(int) * 4,
+        SerializationHeaders::PlayResult, sizeof(int) * 3,
         // (PacketSendTarget)(int)!(bool)clientNumber // nasty but would ve made me tremendously happy
         clientNumber == 0 ? PacketSendTarget::Client1 : PacketSendTarget::Client0
     );

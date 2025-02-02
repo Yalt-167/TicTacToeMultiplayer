@@ -143,12 +143,12 @@ void ClientSocket::HandleChatMessage(const int bufferSize)
 
 void ClientSocket::HandlePlayResult()
 {
-    char play[sizeof(int) * 4];
+    char play[sizeof(int) * 3];
 
-    _ = recv(socket_, play, sizeof(int) * 4, 0);
+    _ = recv(socket_, play, sizeof(int) * 3, 0);
 
     int* playResult = reinterpret_cast<int*>(play);
-    GameClient::HandlePlayResult(playResult[0], playResult[1], static_cast<bool>(playResult[2]), playResult[3]);
+    GameClient::HandlePlayResult(playResult[0], static_cast<bool>(playResult[1]), playResult[2]);
     // I don t like this side but it s more legible within the method this way
 }
 

@@ -5,9 +5,8 @@ enum class SerializationHeaders
 	Disconnection, // packet associated => none
 	Play, // packet associated => int[1]
 	// <int: slot>
-	PlayResult, // packet associated => int[4]
+	PlayResult, // packet associated => int[3]
 	// {
-	// <int: game state after the play>
 	// <int: the play itself>
 	// <int: wether u can play>,
 	// <int: who played>

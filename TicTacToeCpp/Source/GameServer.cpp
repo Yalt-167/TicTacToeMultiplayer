@@ -10,9 +10,8 @@ GameServer::GameServer()
 	instance = this;
 	gameGrid = new Grid(true);
 
-	startupPacket[0] = static_cast<int>(GameResult::None);
-	startupPacket[1] = static_cast<int>(Plays::InvalidPlay);
-	startupPacket[3] = static_cast<int>(false);
+	startupPacket[0] = static_cast<int>(Plays::InvalidPlay);
+	startupPacket[2] = static_cast<int>(false);
 
 	ZeroMemory(gridState, 9); // for the sake of intellisense happy
 }
@@ -47,10 +46,10 @@ void GameServer::Run()
 
 		for (int i = 0; i < 2; i++) // loop over clients
 		{
-			startupPacket[2] = static_cast<int>(i == playerTurn); // wether that client has the turn
+			startupPacket[1] = static_cast<int>(i == playerTurn); // wether that client has the turn
 			serverSocket.Send(
 				reinterpret_cast<char*>(startupPacket),
-				SerializationHeaders::PlayResult, sizeof(int) * 4,
+				SerializationHeaders::PlayResult, sizeof(int) * 3,
 				static_cast<PacketSendTarget>(i)
 			);
 		}
@@ -63,63 +62,54 @@ void GameServer::Run()
 	std::cout << "No more player connected. Shutting down the server" << std::endl;
 }
 
-void GameServer::ParsePlay(const int play, int returnBuffer[4], const int clientNumber)
+void GameServer::ParsePlay(const int play, int returnBuffer[3], const int clientNumber)
 {
 	/*
 	if we branched into that method it means that
 	returnBuffer is basically structured as such:
 	{
-	<int: game state after the play>
 	<int: the play itself>
-	<int: wether u can play>,
+	<int: wether u get the turn again>,
 	<int: who played>
 	}
 	*/
 	// lets set those for clarity and avoid magic values:
-	static constexpr const int gameStateAfterPlay = 0; // could lowkey remove that now
-	static constexpr const int playItself = 1;
-	static constexpr const int canPlay = 2;
-	static constexpr const int whoPlayed = 3;
+	static constexpr const int playItself = 0;
+	static constexpr const int getTheTurnAgain = 1;
+	static constexpr const int whoJustPlayed = 2;
 
 	// returnBuffer[3] = (int)!(bool)instance->playerTurn; // my sorrow is immeasurable
-	returnBuffer[whoPlayed] = instance->playerTurn == 0 ? 1 : 0;
+	returnBuffer[whoJustPlayed] = instance->playerTurn == 0 ? 1 : 0;
 	bool validPlay = instance->CheckPlay(play, clientNumber);
 
 	if (validPlay)
 	{
-		if (Grid::CheckWin())
+		// the current client will not get the next turn
+		returnBuffer[getTheTurnAgain] = static_cast<int>(false); // lowkey despise implicit casting
+
+		bool gameEnded = false;
+		if (gameEnded = Grid::CheckWin())
 		{
 			instance->score[clientNumber]++;
 			GameServer::EndGame(static_cast<GameResult>(static_cast<int>(GameResult::PlayerZeroWon) + clientNumber), clientNumber);
-			returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // to avoid changing client side grids
-			returnBuffer[canPlay] = static_cast<int>(false);
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
-			return;
 			// bc both win result are in a row and <clientNumber> is 0 or 1 so the addition corrects the statement
 			// im dogshit at explaining things but I swear it makes sense
 			// don't worry I get it :D
 		}
-		else if (Grid::CheckDraw())
+		else if (gameEnded = Grid::CheckDraw())
 		{
 			GameServer::EndGame(GameResult::Draw, clientNumber);
-			returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // to avoid changing client side grids
-			returnBuffer[canPlay] = static_cast<int>(false);
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
-			return;
-		}
-		else
-		{
-			returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None);
 		}
 
-		returnBuffer[playItself] = play;
-		returnBuffer[canPlay] = static_cast<int>(false); // lowkey despise implicit casting
+		
+		returnBuffer[playItself] = gameEnded ?
+			static_cast<int>(Plays::InvalidPlay) : // to avoid changing client side grids
+			play;
 	}
 	else
 	{
-		returnBuffer[gameStateAfterPlay] = static_cast<int>(GameResult::None); // ur "efforts" amounted to nothing (again)
 		returnBuffer[playItself] = static_cast<int>(Plays::InvalidPlay); // u ve somehow managed not to understand how TicTacToe works
-		returnBuffer[canPlay] = static_cast<int>(true); // lowkey hate implicit casting
+		returnBuffer[getTheTurnAgain] = static_cast<int>(true); // lowkey hate implicit casting
 	}
 }
 

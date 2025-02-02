@@ -8,7 +8,7 @@ public:
 	GameClient();
 	~GameClient();
 
-	static void HandlePlayResult(const int gameResult, const int play, const bool canPlay, const int symbol);
+	static void HandlePlayResult(const int play, const bool canPlay, const int symbol);
 	
 private:
 	void Run() override;
