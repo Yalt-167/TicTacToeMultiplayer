@@ -5,13 +5,15 @@
 class GameClient : public Game
 {
 public:
-	GameClient(const std::string& userName_);
+	GameClient();
 	~GameClient();
 
 	static void HandlePlayResult(const int gameResult, const int play, const bool canPlay, const int symbol);
 	
 private:
 	void Run() override;
+
+	void PickUsername();
 
 	void Play();
 	void Render() const;
@@ -21,7 +23,7 @@ private:
 	int GatherInput() const;
 
 	static GameClient* instance;
-	class ClientSocket* clientSocket;
+	class ClientSocket* clientSocket = nullptr;
 	std::string userName;
 
 	bool canPlay = false;

@@ -12,13 +12,11 @@ GameClient* GameClient::instance = nullptr;
 const std::string GameClient::youCanPlay = "Your turn";
 const std::string GameClient::youCantPlay = "!Your turn";
 
-GameClient::GameClient(const std::string& userName_)
+GameClient::GameClient()
 {
 	instance = this;
-	userName = userName_;
 	window = new Window(900, 600, "Tic");
 	grid = new Grid(false);
-	clientSocket = new ClientSocket(userName_, &chatMessages);
 }
 GameClient::~GameClient()
 {
@@ -30,15 +28,56 @@ GameClient::~GameClient()
 
 void GameClient::Run()
 {
+	ImGUI::SFML::Init(*window->RenderWindow);
+
+	PickUsername();
+
+	clientSocket = new ClientSocket(userName, &chatMessages);
 	clientSocket->Run();
 
-	ImGUI::SFML::Init(*window->RenderWindow);
 
 	while (shouldRun)
 	{
 		Play();
 		Chat();
 		Render();
+	}
+}
+
+void GameClient::PickUsername()
+{
+	char userName_[64] = "";
+
+	sf::Event event;
+	while (userName.empty())
+	{
+		ImGUI::SFML::Update(*window->RenderWindow, sf::Time());
+		
+		while (window->RenderWindow->pollEvent(event))
+		{
+			ImGUI::SFML::ProcessEvent(event);
+		}
+
+		ImGui::SetNextWindowSize(ImVec2(300, 150));
+		ImGui::SetNextWindowPos(ImVec2(300, 200), ImGuiCond_Always);
+
+		ImGui::Begin("Username Picker", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+
+		// shamelessly permanently borrowed Hugo s code ^^
+		if (ImGui::InputText("##userNamePicker", userName_, IM_ARRAYSIZE(userName_), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			if (strlen(userName_) > 0)
+			{
+				userName = userName_;
+			}
+		}
+	
+		ImGUI::End();
+
+		window->RenderWindow->clear(sf::Color::Black);
+		//grid->Render(window->RenderWindow);
+		ImGui::SFML::Render(*window->RenderWindow);
+		window->RenderWindow->display();
 	}
 }
 
