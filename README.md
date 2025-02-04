@@ -1,4 +1,5 @@
-#Tic Tac Toe 
+#Tic Tac Toe
+
 This is a Multiplayer TicTacToe game made with SFML and Winsoc2
 
 The game architecture is a classical Server/Client (tho the server is set to localhost) and therefore is Server Authoritative.
